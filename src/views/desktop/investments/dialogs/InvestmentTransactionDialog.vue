@@ -167,7 +167,14 @@ import { useI18n } from '@/locales/helpers.ts';
 
 interface Props {
     show: boolean;
-    investment?: any;
+    investment?: {
+        investmentId: string;
+        tickerSymbol: string;
+        companyName?: string;
+        sharesOwned: number;
+        currentPrice: number;
+        currency: string;
+    };
 }
 
 interface Emits {
@@ -196,9 +203,9 @@ const formData = ref({
 
 // Computed
 const totalAmountDisplay = computed(() => {
-    const shares = parseFloat(formData.value.shares as any) || 0;
-    const price = parseFloat(formData.value.pricePerShare as any) || 0;
-    const fees = parseFloat(formData.value.fees as any) || 0;
+    const shares = parseFloat(String(formData.value.shares)) || 0;
+    const price = parseFloat(String(formData.value.pricePerShare)) || 0;
+    const fees = parseFloat(String(formData.value.fees)) || 0;
     const subtotal = shares * price;
     const total = formData.value.transactionType === 'buy' ? subtotal + fees : subtotal - fees;
     return total.toFixed(2);
@@ -241,9 +248,9 @@ const onSubmit = async () => {
         // await investmentApi.addTransaction({
         //     investmentId: props.investment.investmentId,
         //     type: formData.value.transactionType === 'buy' ? 1 : 2,
-        //     shares: parseFloat(formData.value.shares as any),
-        //     pricePerShare: parseFloat(formData.value.pricePerShare as any),
-        //     fees: parseFloat(formData.value.fees as any) || 0,
+        //     shares: parseFloat(String(formData.value.shares)),
+        //     pricePerShare: parseFloat(String(formData.value.pricePerShare)),
+        //     fees: parseFloat(String(formData.value.fees)) || 0,
         //     transactionDate: new Date(formData.value.transactionDate).getTime(),
         //     comment: formData.value.comment
         // });
