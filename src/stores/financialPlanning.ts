@@ -2,7 +2,6 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { useInvestmentStore } from './investment.ts';
 import { useAccountsStore } from './account.ts';
-import { useI18n } from '@/locales/helpers.ts';
 
 export interface FIREMetrics {
     currentAge: number;
