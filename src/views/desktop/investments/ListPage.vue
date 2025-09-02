@@ -212,8 +212,8 @@ const headers = computed(() => [
 const loadInvestments = async () => {
     loading.value = true;
     try {
-        // Load investments from store (which has mock data)
-        investmentStore.loadMockInvestments();
+        // Load investments from store (localStorage temporarily, database eventually)
+        await investmentStore.loadAllInvestments();
     } catch (error) {
         console.error('Failed to load investments:', error);
     } finally {

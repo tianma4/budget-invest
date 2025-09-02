@@ -66,6 +66,59 @@ export const useInvestmentStore = defineStore('investments', () => {
         totalGainLossPct: 0,
         currency: 'USD'
     });
+
+    // TODO: Replace with actual API calls when backend investment endpoints are implemented
+    // For now, using localStorage as temporary persistence until backend APIs are available
+    const STORAGE_KEY = 'budget-invest-investments';
+
+    async function saveInvestment(investment: Investment): Promise<void> {
+        // TODO: Replace with POST /api/v1/investments/create.json
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            const investments = stored ? JSON.parse(stored) : [];
+            const existingIndex = investments.findIndex((inv: Investment) => inv.investmentId === investment.investmentId);
+            
+            if (existingIndex >= 0) {
+                investments[existingIndex] = investment;
+            } else {
+                investments.push(investment);
+            }
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(investments));
+        } catch (error) {
+            console.error('Failed to save investment:', error);
+            throw error;
+        }
+    }
+
+    async function loadInvestments(): Promise<Investment[]> {
+        // TODO: Replace with GET /api/v1/investments/list.json
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                return JSON.parse(stored) as Investment[];
+            }
+            return [];
+        } catch (error) {
+            console.error('Failed to load investments:', error);
+            return [];
+        }
+    }
+
+    async function deleteInvestment(investmentId: string): Promise<void> {
+        // TODO: Replace with DELETE /api/v1/investments/delete.json
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const investments = JSON.parse(stored) as Investment[];
+                const filtered = investments.filter(inv => inv.investmentId !== investmentId);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+            }
+        } catch (error) {
+            console.error('Failed to delete investment:', error);
+            throw error;
+        }
+    }
     
     const portfolioPerformance = ref<PortfolioPerformance>({
         '1d': [],
@@ -119,43 +172,59 @@ export const useInvestmentStore = defineStore('investments', () => {
         return totalValue;
     }
 
-    function loadMockInvestments() {
-        // Mock data - replace with actual API call
-        investments.value = [
-            {
-                investmentId: '1',
-                tickerSymbol: 'AAPL',
-                companyName: 'Apple Inc.',
-                sharesOwned: 10,
-                avgCostPerShare: 15000, // $150.00 in cents
-                totalInvested: 150000, // $1500.00 in cents
-                currentPrice: 18000, // $180.00 in cents
-                currentValue: 180000, // $1800.00 in cents
-                gainLoss: 30000, // $300.00 in cents
-                gainLossPct: 20,
-                currency: 'USD',
-                lastPriceUpdate: Date.now()
-            },
-            {
-                investmentId: '2',
-                tickerSymbol: 'NVDA',
-                companyName: 'NVIDIA Corporation',
-                sharesOwned: 5,
-                avgCostPerShare: 45000, // $450.00 in cents
-                totalInvested: 225000, // $2250.00 in cents
-                currentPrice: 52000, // $520.00 in cents
-                currentValue: 260000, // $2600.00 in cents
-                gainLoss: 35000, // $350.00 in cents
-                gainLossPct: 15.56,
-                currency: 'USD',
-                lastPriceUpdate: Date.now()
+    async function loadAllInvestments() {
+        try {
+            const storedInvestments = await loadInvestments();
+            
+            if (storedInvestments.length > 0) {
+                investments.value = storedInvestments;
+            } else {
+                // Initialize with mock data if no stored investments
+                const mockInvestments = [
+                    {
+                        investmentId: '1',
+                        tickerSymbol: 'AAPL',
+                        companyName: 'Apple Inc.',
+                        sharesOwned: 10,
+                        avgCostPerShare: 15000, // $150.00 in cents
+                        totalInvested: 150000, // $1500.00 in cents
+                        currentPrice: 18000, // $180.00 in cents
+                        currentValue: 180000, // $1800.00 in cents
+                        gainLoss: 30000, // $300.00 in cents
+                        gainLossPct: 20,
+                        currency: 'USD',
+                        lastPriceUpdate: Date.now()
+                    },
+                    {
+                        investmentId: '2',
+                        tickerSymbol: 'NVDA',
+                        companyName: 'NVIDIA Corporation',
+                        sharesOwned: 5,
+                        avgCostPerShare: 45000, // $450.00 in cents
+                        totalInvested: 225000, // $2250.00 in cents
+                        currentPrice: 52000, // $520.00 in cents
+                        currentValue: 260000, // $2600.00 in cents
+                        gainLoss: 35000, // $350.00 in cents
+                        gainLossPct: 15.56,
+                        currency: 'USD',
+                        lastPriceUpdate: Date.now()
+                    }
+                ];
+                
+                investments.value = mockInvestments;
+                // Save mock data for persistence
+                for (const investment of mockInvestments) {
+                    await saveInvestment(investment);
+                }
             }
-        ];
-
-        updatePortfolioSummary();
+            
+            updatePortfolioSummary();
+        } catch (error) {
+            console.error('Failed to load investments:', error);
+        }
     }
 
-    function addInvestment(investmentData: {
+    async function addInvestment(investmentData: {
         tickerSymbol: string;
         companyName?: string;
         shares: number;
@@ -163,30 +232,41 @@ export const useInvestmentStore = defineStore('investments', () => {
         fees: number;
         currency: string;
         comment?: string;
-    }) {
-        // Convert to cents for internal storage
-        const pricePerShareInCents = Math.round(investmentData.pricePerShare * 100);
-        const feesInCents = Math.round(investmentData.fees * 100);
-        const totalInvestedInCents = Math.round(investmentData.shares * investmentData.pricePerShare * 100) + feesInCents;
-        const avgCostPerShareInCents = Math.round(totalInvestedInCents / investmentData.shares);
+    }): Promise<Investment> {
+        try {
+            // Convert to cents for internal storage
+            const pricePerShareInCents = Math.round(investmentData.pricePerShare * 100);
+            const feesInCents = Math.round(investmentData.fees * 100);
+            const totalInvestedInCents = Math.round(investmentData.shares * investmentData.pricePerShare * 100) + feesInCents;
+            const avgCostPerShareInCents = Math.round(totalInvestedInCents / investmentData.shares);
 
-        const newInvestment: Investment = {
-            investmentId: Date.now().toString(), // Simple ID generation
-            tickerSymbol: investmentData.tickerSymbol.toUpperCase(),
-            companyName: investmentData.companyName,
-            sharesOwned: investmentData.shares,
-            avgCostPerShare: avgCostPerShareInCents,
-            totalInvested: totalInvestedInCents,
-            currentPrice: pricePerShareInCents, // Use purchase price as current price initially
-            currentValue: Math.round(investmentData.shares * investmentData.pricePerShare * 100),
-            gainLoss: 0, // No gain/loss initially
-            gainLossPct: 0,
-            currency: investmentData.currency,
-            lastPriceUpdate: Date.now()
-        };
+            const newInvestment: Investment = {
+                investmentId: Date.now().toString(), // Simple ID generation
+                tickerSymbol: investmentData.tickerSymbol.toUpperCase(),
+                companyName: investmentData.companyName,
+                sharesOwned: investmentData.shares,
+                avgCostPerShare: avgCostPerShareInCents,
+                totalInvested: totalInvestedInCents,
+                currentPrice: pricePerShareInCents, // Use purchase price as current price initially
+                currentValue: Math.round(investmentData.shares * investmentData.pricePerShare * 100),
+                gainLoss: 0, // No gain/loss initially
+                gainLossPct: 0,
+                currency: investmentData.currency,
+                lastPriceUpdate: Date.now()
+            };
 
-        investments.value.push(newInvestment);
-        updatePortfolioSummary();
+            // Save to persistent storage (localStorage temporarily, database eventually)
+            await saveInvestment(newInvestment);
+            
+            // Update local state
+            investments.value.push(newInvestment);
+            updatePortfolioSummary();
+            
+            return newInvestment;
+        } catch (error) {
+            console.error('Failed to add investment:', error);
+            throw error;
+        }
     }
 
     function updatePortfolioSummary() {
@@ -307,8 +387,8 @@ export const useInvestmentStore = defineStore('investments', () => {
         };
     });
 
-    // Initialize with mock data
-    loadMockInvestments();
+    // Initialize with stored data
+    loadAllInvestments();
 
     return {
         investments,
@@ -319,9 +399,10 @@ export const useInvestmentStore = defineStore('investments', () => {
         performanceSummary,
         allInvestments,
         getTotalInvestmentValue,
-        loadMockInvestments,
+        loadAllInvestments,
         updatePortfolioSummary,
         addInvestment,
+        deleteInvestment,
         setTimePeriod,
         generateMockPerformanceData
     };
