@@ -180,7 +180,7 @@ const selectedPeriodIndex = ref(2); // Default to 1M
 
 // Hover state
 const hoveredPoint = ref<{ x: number, y: number, data: { timestamp: number, value: number, gainLoss: number, gainLossPct: number } } | null>(null);
-const tooltip = ref<HTMLElement | null>(null);
+const tooltip = ref<{ date: string, value: string, gainLoss: number, gainLossPct: number } | null>(null);
 const tooltipX = ref(0);
 const tooltipY = ref(0);
 

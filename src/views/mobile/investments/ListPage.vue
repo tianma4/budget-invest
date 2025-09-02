@@ -199,20 +199,20 @@
             location="bottom end"
         >
             <v-list>
-                <v-list-item @click="editInvestment(selectedInvestment)">
+                <v-list-item @click="selectedInvestment && editInvestment(selectedInvestment)">
                     <v-list-item-title>
                         <v-icon :icon="mdiPencil" class="me-2" />
                         {{ tt('Edit') }}
                     </v-list-item-title>
                 </v-list-item>
-                <v-list-item @click="addTransaction(selectedInvestment)">
+                <v-list-item @click="selectedInvestment && addTransaction(selectedInvestment)">
                     <v-list-item-title>
                         <v-icon :icon="mdiSwapHorizontal" class="me-2" />
                         {{ tt('Buy/Sell') }}
                     </v-list-item-title>
                 </v-list-item>
                 <v-divider />
-                <v-list-item @click="deleteInvestment(selectedInvestment)" class="text-error">
+                <v-list-item @click="selectedInvestment && deleteInvestment(selectedInvestment)" class="text-error">
                     <v-list-item-title>
                         <v-icon :icon="mdiDelete" class="me-2" />
                         {{ tt('Delete') }}
@@ -245,7 +245,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, type ComponentPublicInstance } from 'vue';
 import {
     mdiPlus,
     mdiRefresh,
@@ -276,7 +276,7 @@ const selectedInvestment = ref<Investment | undefined>(undefined);
 
 // Action menu state
 const showActionMenu = ref(false);
-const actionMenuActivator = ref<HTMLElement | null>(null);
+const actionMenuActivator = ref();
 
 const investments = computed(() => investmentStore.allInvestments);
 const portfolioSummary = computed(() => investmentStore.portfolioSummary);
