@@ -147,3 +147,11 @@ dist/
 
 # Roo Code
 .roo/
+
+
+# Development Docker environment
+.env
+data/
+logs/
+docker-compose.override.yml
+.DS_Store

@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # Development database
+  postgres:
+    image: postgres:15-alpine
+    container_name: budget-invest-db
+    environment:
+      POSTGRES_DB: budget_invest
+      POSTGRES_USER: budget_invest
+      POSTGRES_PASSWORD: budget_invest_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - budget-invest-network
+    restart: unless-stopped
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: budget-invest-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - budget-invest-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Main application (development build)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - RELEASE_BUILD=false
+        - BUILD_PIPELINE=false
+    container_name: budget-invest-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Database configuration
+      - EZBOOKKEEPING_DB_TYPE=postgres
+      - EZBOOKKEEPING_DB_HOST=postgres
+      - EZBOOKKEEPING_DB_PORT=5432
+      - EZBOOKKEEPING_DB_NAME=budget_invest
+      - EZBOOKKEEPING_DB_USER=budget_invest
+      - EZBOOKKEEPING_DB_PASSWD=budget_invest_password
+      
+      # Redis configuration
+      - EZBOOKKEEPING_REDIS_ENABLED=true
+      - EZBOOKKEEPING_REDIS_HOST=redis
+      - EZBOOKKEEPING_REDIS_PORT=6379
+      
+      # Application configuration
+      - EZBOOKKEEPING_MODE=development
+      - EZBOOKKEEPING_LOG_LEVEL=debug
+      - EZBOOKKEEPING_SECRET_KEY=dev_secret_key_change_in_production
+      - EZBOOKKEEPING_TOKEN_EXPIRES_TIME=2592000
+      - EZBOOKKEEPING_TEMPORARY_TOKEN_EXPIRES_TIME=300
+      
+      # Enable development features
+      - EZBOOKKEEPING_ENABLE_USER_REGISTER=true
+      - EZBOOKKEEPING_ENABLE_USER_FORGET_PASSWORD=true
+    volumes:
+      - ./data:/ezbookkeeping/data
+      - ./logs:/ezbookkeeping/log
+      - app_storage:/ezbookkeeping/storage
+    networks:
+      - budget-invest-network
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  # Development tools container (optional)
+  tools:
+    image: node:22-alpine
+    container_name: budget-invest-tools
+    working_dir: /app
+    volumes:
+      - .:/app
+    networks:
+      - budget-invest-network
+    command: tail -f /dev/null  # Keep container running
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_storage:
+    driver: local
+
+networks:
+  budget-invest-network:
+    driver: bridge

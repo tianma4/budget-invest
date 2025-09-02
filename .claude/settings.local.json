@@ -24,7 +24,9 @@
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
       "Bash(go build:*)",
-      "Bash(sudo chown:*)"
+      "Bash(sudo chown:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)"
     ],
     "deny": [],
     "ask": []
