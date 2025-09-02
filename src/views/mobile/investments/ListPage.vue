@@ -245,7 +245,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, type ComponentPublicInstance } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
     mdiPlus,
     mdiRefresh,
