@@ -183,9 +183,29 @@ const alwaysShowNav = computed(() => !mdAndDown.value);
 const showAddInvestmentDialog = ref(false);
 const showEditInvestmentDialog = ref(false);
 const showTransactionDialog = ref(false);
-const selectedInvestment = ref(null);
+const selectedInvestment = ref<{
+    investmentId: string;
+    tickerSymbol: string;
+    companyName?: string;
+    sharesOwned: number;
+    currentPrice: number;
+    currency: string;
+} | null>(null);
 
-const investments = ref<any[]>([]);
+const investments = ref<{
+    investmentId: string;
+    tickerSymbol: string;
+    companyName?: string;
+    sharesOwned: number;
+    avgCostPerShare: number;
+    totalInvested: number;
+    currentPrice: number;
+    currentValue: number;
+    gainLoss: number;
+    gainLossPct: number;
+    currency: string;
+    lastPriceUpdate: number;
+}[]>([]);
 const portfolioSummary = ref({
     totalInvested: 0,
     currentValue: 0,
@@ -286,17 +306,17 @@ const refreshPrices = async () => {
     }
 };
 
-const editInvestment = (investment: any) => {
+const editInvestment = (investment: typeof investments.value[0]) => {
     selectedInvestment.value = investment;
     showEditInvestmentDialog.value = true;
 };
 
-const addTransaction = (investment: any) => {
+const addTransaction = (investment: typeof investments.value[0]) => {
     selectedInvestment.value = investment;
     showTransactionDialog.value = true;
 };
 
-const deleteInvestment = (investment: any) => {
+const deleteInvestment = (investment: typeof investments.value[0]) => {
     // TODO: Show confirmation dialog and delete
     console.log('Delete investment:', investment);
 };
