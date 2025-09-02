@@ -166,6 +166,7 @@ import {
 } from '@mdi/js';
 
 import { useI18n } from '@/locales/helpers.ts';
+import { useInvestmentStore } from '@/stores/investment.ts';
 
 // Import dialogs (will be created)
 import AddInvestmentDialog from './dialogs/AddInvestmentDialog.vue';
@@ -174,6 +175,7 @@ import InvestmentTransactionDialog from './dialogs/InvestmentTransactionDialog.v
 
 const { tt, formatAmountToLocalizedNumeralsWithCurrency } = useI18n();
 const { mdAndDown } = useDisplay();
+const investmentStore = useInvestmentStore();
 
 // Reactive data
 const loading = ref(false);
@@ -185,30 +187,8 @@ const showEditInvestmentDialog = ref(false);
 const showTransactionDialog = ref(false);
 const selectedInvestment = ref<typeof investments.value[0] | undefined>(undefined);
 
-const investments = ref<{
-    investmentId: string;
-    tickerSymbol: string;
-    companyName?: string;
-    sharesOwned: number;
-    avgCostPerShare: number;
-    totalInvested: number;
-    currentPrice: number;
-    currentValue: number;
-    gainLoss: number;
-    gainLossPct: number;
-    currency: string;
-    lastPriceUpdate: number;
-}[]>([]);
-const portfolioSummary = ref({
-    totalInvested: 0,
-    currentValue: 0,
-    totalGainLoss: 0,
-    totalGainLossPct: 0,
-    currency: 'USD',
-    totalInvestedDisplay: '$0.00',
-    currentValueDisplay: '$0.00',
-    totalGainLossDisplay: '$0.00'
-});
+const investments = computed(() => investmentStore.allInvestments);
+const portfolioSummary = computed(() => investmentStore.portfolioSummary);
 
 // Table headers
 const headers = computed(() => [
@@ -226,44 +206,8 @@ const headers = computed(() => [
 const loadInvestments = async () => {
     loading.value = true;
     try {
-        // TODO: Replace with actual API call
-        // const response = await investmentApi.getAll();
-        // investments.value = response.investments;
-        // portfolioSummary.value = response.summary;
-        
-        // Mock data for now
-        investments.value = [
-            {
-                investmentId: '1',
-                tickerSymbol: 'AAPL',
-                companyName: 'Apple Inc.',
-                sharesOwned: 10,
-                avgCostPerShare: 15000, // $150.00 in cents
-                totalInvested: 150000, // $1500.00 in cents
-                currentPrice: 18000, // $180.00 in cents
-                currentValue: 180000, // $1800.00 in cents
-                gainLoss: 30000, // $300.00 in cents
-                gainLossPct: 20,
-                currency: 'USD',
-                lastPriceUpdate: Date.now()
-            },
-            {
-                investmentId: '2',
-                tickerSymbol: 'NVDA',
-                companyName: 'NVIDIA Corporation',
-                sharesOwned: 5,
-                avgCostPerShare: 45000, // $450.00 in cents
-                totalInvested: 225000, // $2250.00 in cents
-                currentPrice: 52000, // $520.00 in cents
-                currentValue: 260000, // $2600.00 in cents
-                gainLoss: 35000, // $350.00 in cents
-                gainLossPct: 15.56,
-                currency: 'USD',
-                lastPriceUpdate: Date.now()
-            }
-        ];
-        
-        updatePortfolioSummary();
+        // Load investments from store (which has mock data)
+        investmentStore.loadMockInvestments();
     } catch (error) {
         console.error('Failed to load investments:', error);
     } finally {
@@ -271,23 +215,6 @@ const loadInvestments = async () => {
     }
 };
 
-const updatePortfolioSummary = () => {
-    const totalInvested = investments.value.reduce((sum, inv) => sum + inv.totalInvested, 0);
-    const currentValue = investments.value.reduce((sum, inv) => sum + inv.currentValue, 0);
-    const totalGainLoss = currentValue - totalInvested;
-    const totalGainLossPct = totalInvested > 0 ? (totalGainLoss / totalInvested) * 100 : 0;
-
-    portfolioSummary.value = {
-        totalInvested,
-        currentValue,
-        totalGainLoss,
-        totalGainLossPct,
-        currency: 'USD',
-        totalInvestedDisplay: formatAmountToLocalizedNumeralsWithCurrency(totalInvested, 'USD'),
-        currentValueDisplay: formatAmountToLocalizedNumeralsWithCurrency(currentValue, 'USD'),
-        totalGainLossDisplay: formatAmountToLocalizedNumeralsWithCurrency(totalGainLoss, 'USD')
-    };
-};
 
 const refreshPrices = async () => {
     loading.value = true;

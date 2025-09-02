@@ -23,7 +23,8 @@
       "Bash(sqlite3:*)",
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(sudo chown:*)"
     ],
     "deny": [],
     "ask": []

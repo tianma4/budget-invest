@@ -4,6 +4,7 @@ import { defineStore } from 'pinia';
 import { useSettingsStore } from './setting.ts';
 import { useUserStore } from './user.ts';
 import { useExchangeRatesStore } from './exchangeRates.ts';
+import { useInvestmentStore } from './investment.ts';
 
 import type { BeforeResolveFunction } from '@/core/base.ts';
 import type { HiddenAmount, NumberWithSuffix } from '@/core/numeral.ts';
@@ -27,6 +28,7 @@ export const useAccountsStore = defineStore('accounts', () => {
     const settingsStore = useSettingsStore();
     const userStore = useUserStore();
     const exchangeRatesStore = useExchangeRatesStore();
+    const investmentStore = useInvestmentStore();
 
     const allAccounts = ref<Account[]>([]);
     const allAccountsMap = ref<Record<string, Account>>({});
@@ -548,6 +550,16 @@ export const useAccountsStore = defineStore('accounts', () => {
 
                 totalAssets += Math.floor(balance);
             }
+        }
+
+        // Add investment portfolio value to total assets
+        const investmentValue = investmentStore.getTotalInvestmentValue(showAccountBalance);
+        
+        if (isNumber(investmentValue)) {
+            totalAssets += investmentValue;
+        } else if (investmentValue && typeof investmentValue === 'object' && 'value' in investmentValue) {
+            totalAssets += investmentValue.value;
+            hasUnCalculatedAmount = true;
         }
 
         if (hasUnCalculatedAmount) {
