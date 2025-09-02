@@ -172,9 +172,9 @@ const formData = ref({
 
 // Computed
 const totalCostDisplay = computed(() => {
-    const shares = parseFloat(formData.value.shares as any) || 0;
-    const price = parseFloat(formData.value.pricePerShare as any) || 0;
-    const fees = parseFloat(formData.value.fees as any) || 0;
+    const shares = parseFloat(String(formData.value.shares)) || 0;
+    const price = parseFloat(String(formData.value.pricePerShare)) || 0;
+    const fees = parseFloat(String(formData.value.fees)) || 0;
     const total = (shares * price) + fees;
     return total.toFixed(2);
 });

@@ -116,7 +116,17 @@ import { useI18n } from '@/locales/helpers.ts';
 
 interface Props {
     show: boolean;
-    investment?: any;
+    investment?: {
+        investmentId: string;
+        tickerSymbol: string;
+        companyName?: string;
+        sharesOwned: number;
+        avgCostPerShare: number;
+        totalInvested: number;
+        currentValue: number;
+        currency: string;
+        comment?: string;
+    };
 }
 
 interface Emits {
