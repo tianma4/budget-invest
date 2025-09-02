@@ -149,5 +149,29 @@ func updateAllDatabaseTablesStructure(c *core.CliContext) error {
 
 	log.BootInfof(c, "[database.updateAllDatabaseTablesStructure] user application cloud settings table maintained successfully")
 
+	err = datastore.Container.UserDataStore.SyncStructs(new(models.Investment))
+
+	if err != nil {
+		return err
+	}
+
+	log.BootInfof(c, "[database.updateAllDatabaseTablesStructure] investment table maintained successfully")
+
+	err = datastore.Container.UserDataStore.SyncStructs(new(models.InvestmentTransaction))
+
+	if err != nil {
+		return err
+	}
+
+	log.BootInfof(c, "[database.updateAllDatabaseTablesStructure] investment transaction table maintained successfully")
+
+	err = datastore.Container.UserDataStore.SyncStructs(new(models.StockPrice))
+
+	if err != nil {
+		return err
+	}
+
+	log.BootInfof(c, "[database.updateAllDatabaseTablesStructure] stock price table maintained successfully")
+
 	return nil
 }
