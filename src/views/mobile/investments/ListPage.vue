@@ -285,7 +285,7 @@ const portfolioSummary = computed(() => investmentStore.portfolioSummary);
 const loadInvestments = async () => {
     loading.value = true;
     try {
-        investmentStore.loadMockInvestments();
+        await investmentStore.loadAllInvestments();
     } catch (error) {
         console.error('Failed to load investments:', error);
     } finally {
