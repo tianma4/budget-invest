@@ -256,7 +256,7 @@ import {
 } from '@mdi/js';
 
 import { useI18n } from '@/locales/helpers.ts';
-import { useInvestmentStore } from '@/stores/investment.ts';
+import { useInvestmentStore, type Investment } from '@/stores/investment.ts';
 
 // Import dialogs and components
 import AddInvestmentDialog from '../desktop/investments/dialogs/AddInvestmentDialog.vue';
@@ -272,11 +272,11 @@ const loading = ref(false);
 const showAddInvestmentDialog = ref(false);
 const showEditInvestmentDialog = ref(false);
 const showTransactionDialog = ref(false);
-const selectedInvestment = ref<any>(undefined);
+const selectedInvestment = ref<Investment | undefined>(undefined);
 
 // Action menu state
 const showActionMenu = ref(false);
-const actionMenuActivator = ref<any>(null);
+const actionMenuActivator = ref<HTMLElement | null>(null);
 
 const investments = computed(() => investmentStore.allInvestments);
 const portfolioSummary = computed(() => investmentStore.portfolioSummary);
@@ -319,30 +319,30 @@ const getAssetIcon = (symbol: string) => {
     return symbol.substring(0, 2);
 };
 
-const viewInvestmentDetails = (investment: any) => {
+const viewInvestmentDetails = (investment: Investment) => {
     selectedInvestment.value = investment;
     showEditInvestmentDialog.value = true;
 };
 
-const openActionMenu = (investment: any, event: Event) => {
+const openActionMenu = (investment: Investment, event: Event) => {
     selectedInvestment.value = investment;
-    actionMenuActivator.value = event.target;
+    actionMenuActivator.value = event.target as HTMLElement;
     showActionMenu.value = true;
 };
 
-const editInvestment = (investment: any) => {
+const editInvestment = (investment: Investment) => {
     selectedInvestment.value = investment;
     showEditInvestmentDialog.value = true;
     showActionMenu.value = false;
 };
 
-const addTransaction = (investment: any) => {
+const addTransaction = (investment: Investment) => {
     selectedInvestment.value = investment;
     showTransactionDialog.value = true;
     showActionMenu.value = false;
 };
 
-const deleteInvestment = (investment: any) => {
+const deleteInvestment = (investment: Investment) => {
     console.log('Delete investment:', investment);
     showActionMenu.value = false;
 };

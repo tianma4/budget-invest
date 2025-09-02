@@ -189,13 +189,13 @@ const tickerRules = [
 ];
 
 const sharesRules = [
-    (v: any) => !!v || tt('Number of shares is required'),
-    (v: any) => parseFloat(v) > 0 || tt('Number of shares must be greater than 0')
+    (v: string) => !!v || tt('Number of shares is required'),
+    (v: string) => parseFloat(v) > 0 || tt('Number of shares must be greater than 0')
 ];
 
 const priceRules = [
-    (v: any) => !!v || tt('Price per share is required'),
-    (v: any) => parseFloat(v) > 0 || tt('Price per share must be greater than 0')
+    (v: string) => !!v || tt('Price per share is required'),
+    (v: string) => parseFloat(v) > 0 || tt('Price per share must be greater than 0')
 ];
 
 const commentRules = [
