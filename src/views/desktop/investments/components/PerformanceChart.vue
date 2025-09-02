@@ -255,7 +255,6 @@ const onChartMouseMove = (event: MouseEvent) => {
     
     const rect = (event.target as SVGElement).getBoundingClientRect();
     const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
     
     // Find closest data point
     const dataX = (x - chartPadding) / (chartWidth.value - 2 * chartPadding);

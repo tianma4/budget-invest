@@ -276,7 +276,7 @@ const selectedInvestment = ref<any>(undefined);
 
 // Action menu state
 const showActionMenu = ref(false);
-const actionMenuActivator = ref<HTMLElement | null>(null);
+const actionMenuActivator = ref<any>(null);
 
 const investments = computed(() => investmentStore.allInvestments);
 const portfolioSummary = computed(() => investmentStore.portfolioSummary);
@@ -326,7 +326,7 @@ const viewInvestmentDetails = (investment: any) => {
 
 const openActionMenu = (investment: any, event: Event) => {
     selectedInvestment.value = investment;
-    actionMenuActivator.value = event.target as HTMLElement;
+    actionMenuActivator.value = event.target;
     showActionMenu.value = true;
 };
 
