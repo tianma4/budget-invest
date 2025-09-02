@@ -190,7 +190,7 @@ const selectedInvestment = ref<{
     sharesOwned: number;
     currentPrice: number;
     currency: string;
-} | null>(null);
+} | undefined>(undefined);
 
 const investments = ref<{
     investmentId: string;
