@@ -45,7 +45,7 @@
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field
-                                :model-value="formatAmountWithCurrency(investment.avgCostPerShare, investment.currency)"
+                                :model-value="formatAmountToLocalizedNumeralsWithCurrency(investment.avgCostPerShare, investment.currency)"
                                 :label="tt('Average Cost per Share')"
                                 variant="outlined"
                                 readonly
@@ -56,7 +56,7 @@
                     <v-row>
                         <v-col cols="12" md="6">
                             <v-text-field
-                                :model-value="formatAmountWithCurrency(investment.totalInvested, investment.currency)"
+                                :model-value="formatAmountToLocalizedNumeralsWithCurrency(investment.totalInvested, investment.currency)"
                                 :label="tt('Total Invested')"
                                 variant="outlined"
                                 readonly
@@ -64,7 +64,7 @@
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field
-                                :model-value="formatAmountWithCurrency(investment.currentValue, investment.currency)"
+                                :model-value="formatAmountToLocalizedNumeralsWithCurrency(investment.currentValue, investment.currency)"
                                 :label="tt('Current Value')"
                                 variant="outlined"
                                 readonly
@@ -113,7 +113,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from '@/locales/helpers.ts';
-import { formatAmountWithCurrency } from '@/lib/numeral.ts';
 
 interface Props {
     show: boolean;
@@ -128,7 +127,7 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const { tt } = useI18n();
+const { tt, formatAmountToLocalizedNumeralsWithCurrency } = useI18n();
 
 // Form data
 const form = ref();

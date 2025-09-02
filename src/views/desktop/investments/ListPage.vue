@@ -79,24 +79,24 @@
                                 </template>
 
                                 <template #item.avgCostPerShare="{ item }">
-                                    {{ formatAmountWithCurrency(item.avgCostPerShare, item.currency) }}
+                                    {{ formatAmountToLocalizedNumeralsWithCurrency(item.avgCostPerShare, item.currency) }}
                                 </template>
 
                                 <template #item.currentPrice="{ item }">
-                                    {{ formatAmountWithCurrency(item.currentPrice, item.currency) }}
+                                    {{ formatAmountToLocalizedNumeralsWithCurrency(item.currentPrice, item.currency) }}
                                 </template>
 
                                 <template #item.totalInvested="{ item }">
-                                    {{ formatAmountWithCurrency(item.totalInvested, item.currency) }}
+                                    {{ formatAmountToLocalizedNumeralsWithCurrency(item.totalInvested, item.currency) }}
                                 </template>
 
                                 <template #item.currentValue="{ item }">
-                                    {{ formatAmountWithCurrency(item.currentValue, item.currency) }}
+                                    {{ formatAmountToLocalizedNumeralsWithCurrency(item.currentValue, item.currency) }}
                                 </template>
 
                                 <template #item.gainLoss="{ item }">
                                     <div :class="item.gainLoss >= 0 ? 'text-success' : 'text-error'">
-                                        {{ formatAmountWithCurrency(item.gainLoss, item.currency) }}
+                                        {{ formatAmountToLocalizedNumeralsWithCurrency(item.gainLoss, item.currency) }}
                                         <div class="text-caption">{{ item.gainLossPct.toFixed(2) }}%</div>
                                     </div>
                                 </template>
@@ -166,14 +166,13 @@ import {
 } from '@mdi/js';
 
 import { useI18n } from '@/locales/helpers.ts';
-import { formatAmountWithCurrency } from '@/lib/numeral.ts';
 
 // Import dialogs (will be created)
 import AddInvestmentDialog from './dialogs/AddInvestmentDialog.vue';
 import EditInvestmentDialog from './dialogs/EditInvestmentDialog.vue';
 import InvestmentTransactionDialog from './dialogs/InvestmentTransactionDialog.vue';
 
-const { tt } = useI18n();
+const { tt, formatAmountToLocalizedNumeralsWithCurrency } = useI18n();
 const { mdAndDown } = useDisplay();
 
 // Reactive data
@@ -186,7 +185,7 @@ const showEditInvestmentDialog = ref(false);
 const showTransactionDialog = ref(false);
 const selectedInvestment = ref(null);
 
-const investments = ref([]);
+const investments = ref<any[]>([]);
 const portfolioSummary = ref({
     totalInvested: 0,
     currentValue: 0,
@@ -271,9 +270,9 @@ const updatePortfolioSummary = () => {
         totalGainLoss,
         totalGainLossPct,
         currency: 'USD',
-        totalInvestedDisplay: formatAmountWithCurrency(totalInvested, 'USD'),
-        currentValueDisplay: formatAmountWithCurrency(currentValue, 'USD'),
-        totalGainLossDisplay: formatAmountWithCurrency(totalGainLoss, 'USD')
+        totalInvestedDisplay: formatAmountToLocalizedNumeralsWithCurrency(totalInvested, 'USD'),
+        currentValueDisplay: formatAmountToLocalizedNumeralsWithCurrency(currentValue, 'USD'),
+        totalGainLossDisplay: formatAmountToLocalizedNumeralsWithCurrency(totalGainLoss, 'USD')
     };
 };
 

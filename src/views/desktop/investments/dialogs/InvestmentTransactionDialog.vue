@@ -127,7 +127,7 @@
                     </v-row>
                     
                     <v-alert 
-                        v-if="formData.transactionType === 'sell' && formData.shares > investment.sharesOwned" 
+                        v-if="formData.transactionType === 'sell' && formData.shares && formData.shares > investment.sharesOwned" 
                         type="warning" 
                         variant="tonal" 
                         class="mb-4"
