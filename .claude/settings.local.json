@@ -26,7 +26,11 @@
       "Bash(go build:*)",
       "Bash(sudo chown:*)",
       "Bash(docker:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(./dev-stop.sh:*)",
+      "Bash(lsof:*)",
+      "Bash(./dev-start.sh:*)",
+      "Bash(./dev-logs.sh:*)"
     ],
     "deny": [],
     "ask": []

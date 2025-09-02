@@ -37,4 +37,4 @@ fi
 
 echo ""
 echo "🎉 Budget Invest has been rebuilt and is ready!"
-echo "🌐 Access at: http://localhost:8080"
+echo "🌐 Access at: http://localhost:3000"

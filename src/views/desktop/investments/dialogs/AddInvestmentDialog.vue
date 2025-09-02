@@ -17,7 +17,7 @@
                                 :label="tt('Ticker Symbol')"
                                 :rules="tickerRules"
                                 :loading="lookingUpTicker"
-                                placeholder="e.g. AAPL, NVDA"
+                                placeholder="e.g. AAPL, BTC, ETH"
                                 variant="outlined"
                                 @blur="lookupStock"
                                 required
@@ -139,6 +139,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from '@/locales/helpers.ts';
+import { useInvestmentStore } from '@/stores/investment.ts';
 
 interface Props {
     show: boolean;
@@ -153,6 +154,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const { tt } = useI18n();
+const investmentStore = useInvestmentStore();
 
 // Form data
 const form = ref();
@@ -187,13 +189,13 @@ const tickerRules = [
 ];
 
 const sharesRules = [
-    (v: number) => !!v || tt('Number of shares is required'),
-    (v: number) => v > 0 || tt('Number of shares must be greater than 0')
+    (v: any) => !!v || tt('Number of shares is required'),
+    (v: any) => parseFloat(v) > 0 || tt('Number of shares must be greater than 0')
 ];
 
 const priceRules = [
-    (v: number) => !!v || tt('Price per share is required'),
-    (v: number) => v > 0 || tt('Price per share must be greater than 0')
+    (v: any) => !!v || tt('Price per share is required'),
+    (v: any) => parseFloat(v) > 0 || tt('Price per share must be greater than 0')
 ];
 
 const commentRules = [
@@ -220,13 +222,28 @@ const lookupStock = async () => {
         // formData.value.companyName = response.companyName;
         // formData.value.pricePerShare = response.currentPrice;
         
-        // Mock lookup for now
+        // Mock lookup for stocks and crypto
         const mockData: { [key: string]: { name: string, price: number } } = {
+            // Stocks
             'AAPL': { name: 'Apple Inc.', price: 180.00 },
             'NVDA': { name: 'NVIDIA Corporation', price: 520.00 },
             'MSFT': { name: 'Microsoft Corporation', price: 420.00 },
             'GOOGL': { name: 'Alphabet Inc.', price: 140.00 },
-            'TSLA': { name: 'Tesla, Inc.', price: 240.00 }
+            'TSLA': { name: 'Tesla, Inc.', price: 240.00 },
+            'AMZN': { name: 'Amazon.com Inc.', price: 135.00 },
+            'META': { name: 'Meta Platforms Inc.', price: 295.00 },
+            
+            // Cryptocurrencies
+            'BTC': { name: 'Bitcoin', price: 43500.00 },
+            'ETH': { name: 'Ethereum', price: 2650.00 },
+            'BNB': { name: 'Binance Coin', price: 315.00 },
+            'ADA': { name: 'Cardano', price: 0.48 },
+            'SOL': { name: 'Solana', price: 98.50 },
+            'DOT': { name: 'Polkadot', price: 7.25 },
+            'MATIC': { name: 'Polygon', price: 0.85 },
+            'LINK': { name: 'Chainlink', price: 14.50 },
+            'AVAX': { name: 'Avalanche', price: 36.80 },
+            'UNI': { name: 'Uniswap', price: 6.75 }
         };
         
         const ticker = formData.value.tickerSymbol.toUpperCase();
@@ -251,27 +268,43 @@ const calculateTotal = () => {
 };
 
 const onSubmit = async () => {
-    if (!valid.value) return;
+    console.log('Form submit called, valid:', valid.value, 'submitting:', submitting.value);
+    
+    // Manually validate the form
+    if (form.value) {
+        const { valid: isValid } = await form.value.validate();
+        if (!isValid) {
+            console.log('Form validation failed');
+            return;
+        }
+    }
+    
+    if (!valid.value) {
+        console.log('Form not valid, cannot submit');
+        return;
+    }
     
     submitting.value = true;
     try {
-        // TODO: Replace with actual API call
-        // await investmentApi.create({
-        //     tickerSymbol: formData.value.tickerSymbol.toUpperCase(),
-        //     companyName: formData.value.companyName,
-        //     shares: parseFloat(formData.value.shares as any),
-        //     pricePerShare: parseFloat(formData.value.pricePerShare as any),
-        //     fees: parseFloat(formData.value.fees as any) || 0,
-        //     currency: formData.value.currency,
-        //     comment: formData.value.comment
-        // });
+        console.log('Adding investment to store:', formData.value);
         
-        // Mock success
-        console.log('Creating investment:', formData.value);
+        // Add investment to store
+        investmentStore.addInvestment({
+            tickerSymbol: formData.value.tickerSymbol.toUpperCase(),
+            companyName: formData.value.companyName,
+            shares: parseFloat(String(formData.value.shares)),
+            pricePerShare: parseFloat(String(formData.value.pricePerShare)),
+            fees: parseFloat(String(formData.value.fees)) || 0,
+            currency: formData.value.currency,
+            comment: formData.value.comment
+        });
         
+        console.log('Investment added successfully, emitting events');
         emit('added');
         emit('update:show', false);
         resetForm();
+        
+        console.log('Dialog should close now');
     } catch (error) {
         console.error('Failed to create investment:', error);
         // TODO: Show error message

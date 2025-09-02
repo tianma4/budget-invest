@@ -22,7 +22,7 @@ This guide helps you set up a local development environment for Budget Invest us
    ```
 
 3. **Access the application**:
-   - Open http://localhost:8080 in your browser
+   - Open http://localhost:3000 in your browser
    - Register a new user account
    - Start using Budget Invest!
 
@@ -44,7 +44,7 @@ This guide helps you set up a local development environment for Budget Invest us
 The development environment includes:
 
 ### Main Application (`app`)
-- **URL**: http://localhost:8080
+- **URL**: http://localhost:3000
 - **Container**: budget-invest-app
 - **Description**: The main Budget Invest application
 
@@ -141,7 +141,7 @@ docker volume rm budget-invest_postgres_data budget-invest_redis_data
 docker info
 
 # Check for port conflicts
-lsof -i :8080
+lsof -i :3000
 lsof -i :5432
 lsof -i :6379
 

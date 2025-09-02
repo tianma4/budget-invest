@@ -42,7 +42,7 @@ services:
         - BUILD_PIPELINE=false
     container_name: budget-invest-app
     ports:
-      - "8080:8080"
+      - "3000:8080"
     environment:
       # Database configuration
       - EZBOOKKEEPING_DB_TYPE=postgres

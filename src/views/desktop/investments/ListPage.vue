@@ -57,12 +57,18 @@
                             </v-btn>
                         </div>
 
+                        <!-- Performance Chart -->
+                        <div class="px-6">
+                            <performance-chart />
+                        </div>
+
                         <div class="pa-6">
                             <v-data-table
                                 :loading="loading"
                                 :headers="headers"
                                 :items="investments"
-                                :items-per-page="25"
+                                :items-per-page="-1"
+                                hide-default-footer
                                 class="border"
                             >
                                 <template #item.tickerSymbol="{ item }">
@@ -168,10 +174,11 @@ import {
 import { useI18n } from '@/locales/helpers.ts';
 import { useInvestmentStore } from '@/stores/investment.ts';
 
-// Import dialogs (will be created)
+// Import dialogs and components
 import AddInvestmentDialog from './dialogs/AddInvestmentDialog.vue';
 import EditInvestmentDialog from './dialogs/EditInvestmentDialog.vue';
 import InvestmentTransactionDialog from './dialogs/InvestmentTransactionDialog.vue';
+import PerformanceChart from './components/PerformanceChart.vue';
 
 const { tt, formatAmountToLocalizedNumeralsWithCurrency } = useI18n();
 const { mdAndDown } = useDisplay();
@@ -242,7 +249,7 @@ const deleteInvestment = (investment: typeof investments.value[0]) => {
 };
 
 const onInvestmentAdded = () => {
-    loadInvestments();
+    // Investment already added to store, no need to reload mock data
 };
 
 const onInvestmentUpdated = () => {

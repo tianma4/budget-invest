@@ -181,6 +181,10 @@
                                              :loading="loadingOverview" :disabled="loadingOverview"
                                              :enable-click-item="true" @click="clickMonthlyIncomeOrExpense" />
         </v-col>
+
+        <v-col cols="12" md="6">
+            <investment-overview-card :loading="loadingOverview" />
+        </v-col>
     </v-row>
 
     <snack-bar ref="snackbar" />
@@ -190,6 +194,7 @@
 import SnackBar from '@/components/desktop/SnackBar.vue';
 import IncomeExpenseOverviewCard from './overview/cards/IncomeExpenseOverviewCard.vue';
 import MonthlyIncomeAndExpenseCard, { type MonthlyIncomeAndExpenseCardClickEvent } from './overview/cards/MonthlyIncomeAndExpenseCard.vue';
+import InvestmentOverviewCard from './overview/cards/InvestmentOverviewCard.vue';
 
 import { ref, computed, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
