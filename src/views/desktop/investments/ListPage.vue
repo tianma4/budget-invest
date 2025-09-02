@@ -67,8 +67,7 @@
                                 :loading="loading"
                                 :headers="headers"
                                 :items="investments"
-                                :items-per-page="-1"
-                                hide-default-footer
+                                :items-per-page="10"
                                 class="border"
                             >
                                 <template #item.tickerSymbol="{ item }">
@@ -249,7 +248,8 @@ const deleteInvestment = (investment: typeof investments.value[0]) => {
 };
 
 const onInvestmentAdded = () => {
-    // Investment already added to store, no need to reload mock data
+    // Refresh investments and portfolio summary after adding new investment
+    loadInvestments();
 };
 
 const onInvestmentUpdated = () => {
