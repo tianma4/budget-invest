@@ -90,6 +90,12 @@
                         <span class="nav-item-title">{{ tt('Investment Portfolio') }}</span>
                     </router-link>
                 </li>
+                <li class="nav-link">
+                    <router-link to="/planning">
+                        <v-icon class="nav-item-icon" :icon="mdiTargetVariant"/>
+                        <span class="nav-item-title">{{ tt('Financial Planning') }}</span>
+                    </router-link>
+                </li>
                 <li class="nav-section-title">
                     <div class="title-wrapper">
                         <span class="title-text">{{ tt('Miscellaneous') }}</span>
@@ -241,6 +247,7 @@ import {
     mdiChartPieOutline,
     mdiSwapHorizontal,
     mdiTrendingUp,
+    mdiTargetVariant,
     mdiCogOutline,
     mdiCellphone,
     mdiInformationOutline,

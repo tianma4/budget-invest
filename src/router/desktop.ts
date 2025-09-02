@@ -30,6 +30,7 @@ import AppSettingsPage from '@/views/desktop/app/AppSettingsPage.vue';
 
 import ExchangeRatesListPage from '@/views/desktop/exchangerates/ListPage.vue';
 import InvestmentListPage from '@/views/desktop/investments/ListPage.vue';
+import PlanningDashboardPage from '@/views/desktop/planning/DashboardPage.vue';
 import AboutPage from '@/views/desktop/AboutPage.vue';
 
 function checkLogin(): NavigationGuardReturn {
@@ -171,6 +172,11 @@ const router = createRouter({
                 {
                     path: '/investments',
                     component: InvestmentListPage,
+                    beforeEnter: checkLogin
+                },
+                {
+                    path: '/planning',
+                    component: PlanningDashboardPage,
                     beforeEnter: checkLogin
                 },
                 {
