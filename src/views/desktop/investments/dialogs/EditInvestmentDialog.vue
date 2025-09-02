@@ -123,8 +123,12 @@ interface Props {
         sharesOwned: number;
         avgCostPerShare: number;
         totalInvested: number;
+        currentPrice: number;
         currentValue: number;
+        gainLoss: number;
+        gainLossPct: number;
         currency: string;
+        lastPriceUpdate: number;
         comment?: string;
     };
 }

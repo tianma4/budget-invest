@@ -183,14 +183,7 @@ const alwaysShowNav = computed(() => !mdAndDown.value);
 const showAddInvestmentDialog = ref(false);
 const showEditInvestmentDialog = ref(false);
 const showTransactionDialog = ref(false);
-const selectedInvestment = ref<{
-    investmentId: string;
-    tickerSymbol: string;
-    companyName?: string;
-    sharesOwned: number;
-    currentPrice: number;
-    currency: string;
-} | undefined>(undefined);
+const selectedInvestment = ref<typeof investments.value[0] | undefined>(undefined);
 
 const investments = ref<{
     investmentId: string;

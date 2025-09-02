@@ -172,8 +172,14 @@ interface Props {
         tickerSymbol: string;
         companyName?: string;
         sharesOwned: number;
+        avgCostPerShare: number;
+        totalInvested: number;
         currentPrice: number;
+        currentValue: number;
+        gainLoss: number;
+        gainLossPct: number;
         currency: string;
+        lastPriceUpdate: number;
     };
 }
 
