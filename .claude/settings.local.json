@@ -7,7 +7,18 @@
       "Bash(git rm:*)",
       "Bash(git commit:*)",
       "Bash(git remote set-url:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git remote remove:*)",
+      "Bash(git remote add:*)",
+      "Bash(git config:*)",
+      "Bash(ssh-add:*)",
+      "Bash(flyctl:*)",
+      "Bash(brew install:*)",
+      "Bash(brew link:*)",
+      "Bash(chmod:*)",
+      "Bash(./copy_db.sh:*)"
     ],
     "deny": [],
     "ask": []
