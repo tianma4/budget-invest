@@ -45,7 +45,7 @@
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field
-                                :model-value="formatMoney(investment.avgCostPerShare, investment.currency)"
+                                :model-value="formatAmountWithCurrency(investment.avgCostPerShare, investment.currency)"
                                 :label="tt('Average Cost per Share')"
                                 variant="outlined"
                                 readonly
@@ -56,7 +56,7 @@
                     <v-row>
                         <v-col cols="12" md="6">
                             <v-text-field
-                                :model-value="formatMoney(investment.totalInvested, investment.currency)"
+                                :model-value="formatAmountWithCurrency(investment.totalInvested, investment.currency)"
                                 :label="tt('Total Invested')"
                                 variant="outlined"
                                 readonly
@@ -64,7 +64,7 @@
                         </v-col>
                         <v-col cols="12" md="6">
                             <v-text-field
-                                :model-value="formatMoney(investment.currentValue, investment.currency)"
+                                :model-value="formatAmountWithCurrency(investment.currentValue, investment.currency)"
                                 :label="tt('Current Value')"
                                 variant="outlined"
                                 readonly
@@ -111,9 +111,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { useI18n } from '@/lib/common.ts';
-import { formatMoney } from '@/lib/numeral.ts';
+import { ref, watch } from 'vue';
+import { useI18n } from '@/locales/helpers.ts';
+import { formatAmountWithCurrency } from '@/lib/numeral.ts';
 
 interface Props {
     show: boolean;

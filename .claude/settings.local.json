@@ -18,7 +18,12 @@
       "Bash(brew install:*)",
       "Bash(brew link:*)",
       "Bash(chmod:*)",
-      "Bash(./copy_db.sh:*)"
+      "Bash(./copy_db.sh:*)",
+      "Bash(go run:*)",
+      "Bash(sqlite3:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(go build:*)"
     ],
     "deny": [],
     "ask": []

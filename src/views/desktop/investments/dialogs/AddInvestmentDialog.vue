@@ -138,7 +138,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useI18n } from '@/lib/common.ts';
+import { useI18n } from '@/locales/helpers.ts';
 
 interface Props {
     show: boolean;
@@ -163,8 +163,8 @@ const lookingUpTicker = ref(false);
 const formData = ref({
     tickerSymbol: '',
     companyName: '',
-    shares: null,
-    pricePerShare: null,
+    shares: null as number | null,
+    pricePerShare: null as number | null,
     fees: 0,
     currency: 'USD',
     comment: ''

@@ -163,7 +163,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { mdiTrendingUp, mdiTrendingDown } from '@mdi/js';
-import { useI18n } from '@/lib/common.ts';
+import { useI18n } from '@/locales/helpers.ts';
 
 interface Props {
     show: boolean;
@@ -187,8 +187,8 @@ const submitting = ref(false);
 
 const formData = ref({
     transactionType: 'buy',
-    shares: null,
-    pricePerShare: null,
+    shares: null as number | null,
+    pricePerShare: null as number | null,
     fees: 0,
     transactionDate: new Date().toISOString().split('T')[0],
     comment: ''
@@ -205,13 +205,18 @@ const totalAmountDisplay = computed(() => {
 });
 
 // Validation rules
-const sharesRules = computed(() => [
-    (v: number) => !!v || tt('Number of shares is required'),
-    (v: number) => v > 0 || tt('Number of shares must be greater than 0'),
-    ...(formData.value.transactionType === 'sell' ? [
-        (v: number) => v <= (props.investment?.sharesOwned || 0) || tt('Cannot sell more shares than you own')
-    ] : [])
-]);
+const sharesRules = computed(() => {
+    const baseRules = [
+        (v: number) => !!v || tt('Number of shares is required'),
+        (v: number) => v > 0 || tt('Number of shares must be greater than 0')
+    ];
+    
+    if (formData.value.transactionType === 'sell' && props.investment) {
+        baseRules.push((v: number) => v <= (props.investment?.sharesOwned || 0) || tt('Cannot sell more shares than you own'));
+    }
+    
+    return baseRules;
+});
 
 const priceRules = [
     (v: number) => !!v || tt('Price per share is required'),
@@ -281,7 +286,7 @@ watch(() => props.show, (newValue) => {
     } else if (props.investment) {
         // Pre-fill current price if available
         if (props.investment.currentPrice) {
-            formData.value.pricePerShare = (props.investment.currentPrice / 100).toFixed(2);
+            formData.value.pricePerShare = parseFloat((props.investment.currentPrice / 100).toFixed(2));
         }
     }
 });
