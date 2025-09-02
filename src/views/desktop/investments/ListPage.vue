@@ -200,13 +200,13 @@ const portfolioSummary = ref({
 // Table headers
 const headers = computed(() => [
     { title: tt('Ticker'), key: 'tickerSymbol', sortable: true },
-    { title: tt('Shares'), key: 'sharesOwned', sortable: true, align: 'end' },
-    { title: tt('Avg Cost'), key: 'avgCostPerShare', sortable: true, align: 'end' },
-    { title: tt('Current Price'), key: 'currentPrice', sortable: true, align: 'end' },
-    { title: tt('Total Invested'), key: 'totalInvested', sortable: true, align: 'end' },
-    { title: tt('Current Value'), key: 'currentValue', sortable: true, align: 'end' },
-    { title: tt('P&L'), key: 'gainLoss', sortable: true, align: 'end' },
-    { title: tt('Actions'), key: 'actions', sortable: false, align: 'center', width: 100 }
+    { title: tt('Shares'), key: 'sharesOwned', sortable: true, align: 'end' as const },
+    { title: tt('Avg Cost'), key: 'avgCostPerShare', sortable: true, align: 'end' as const },
+    { title: tt('Current Price'), key: 'currentPrice', sortable: true, align: 'end' as const },
+    { title: tt('Total Invested'), key: 'totalInvested', sortable: true, align: 'end' as const },
+    { title: tt('Current Value'), key: 'currentValue', sortable: true, align: 'end' as const },
+    { title: tt('P&L'), key: 'gainLoss', sortable: true, align: 'end' as const },
+    { title: tt('Actions'), key: 'actions', sortable: false, align: 'center' as const, width: 100 }
 ]);
 
 // Methods
