@@ -7,7 +7,8 @@
                         <div class="mx-6 my-4">
                             <btn-vertical-group :disabled="loading" :buttons="[
                                 { name: tt('Categorical Analysis'), value: StatisticsAnalysisType.CategoricalAnalysis },
-                                { name: tt('Trend Analysis'), value: StatisticsAnalysisType.TrendAnalysis }
+                                { name: tt('Trend Analysis'), value: StatisticsAnalysisType.TrendAnalysis },
+                                { name: tt('Monthly Category Spending'), value: StatisticsAnalysisType.MonthlyCategorySpending }
                             ]" v-model="queryAnalysisType" />
                         </div>
                         <v-divider />
@@ -296,6 +297,19 @@
                                             @click="onClickTrendChartItem"
                                         />
                                     </v-card-text>
+
+                                    <v-card-text :class="{ 'readonly': loading }" v-if="queryAnalysisType === StatisticsAnalysisType.MonthlyCategorySpending">
+                                        <monthly-category-spending-chart
+                                            :data="monthlyCategoryData"
+                                            :currency="defaultCurrency"
+                                            :date-range="categoryDateRange"
+                                            :selected-categories="selectedCategoryFilters"
+                                            v-if="!initing"
+                                        />
+                                        <div v-else-if="initing" class="d-flex justify-center align-center" style="height: 400px;">
+                                            <v-progress-circular indeterminate size="64" />
+                                        </div>
+                                    </v-card-text>
                                 </v-card>
                             </v-window-item>
                         </v-window>
@@ -342,10 +356,14 @@
 <script setup lang="ts">
 import SnackBar from '@/components/desktop/SnackBar.vue';
 import MonthlyTrendsChart from '@/components/desktop/MonthlyTrendsChart.vue';
+import MonthlyCategorySpendingChart from '@/components/desktop/MonthlyCategorySpendingChart.vue';
 import AccountFilterSettingsCard from '@/views/desktop/common/cards/AccountFilterSettingsCard.vue';
 import CategoryFilterSettingsCard from '@/views/desktop/common/cards/CategoryFilterSettingsCard.vue';
 import TransactionTagFilterSettingsCard from '@/views/desktop/common/cards/TransactionTagFilterSettingsCard.vue';
 import ExportDialog from '@/views/desktop/statistics/transaction/dialogs/ExportDialog.vue';
+import BtnVerticalGroup from '@/components/desktop/BtnVerticalGroup.vue';
+import PieChart from '@/components/desktop/PieChart.vue';
+import ItemIcon from '@/components/common/ItemIcon.vue';
 
 import { ref, computed, useTemplateRef, watch } from 'vue';
 import { useRouter, onBeforeRouteUpdate } from 'vue-router';
@@ -481,13 +499,24 @@ const showFilterAccountDialog = ref<boolean>(false);
 const showFilterCategoryDialog = ref<boolean>(false);
 const showFilterTagDialog = ref<boolean>(false);
 
+// Monthly category spending data
+const monthlyCategoryData = ref<any[]>([]);
+const selectedCategoryFilters = ref<string[]>([]);
+
 const isDarkMode = computed<boolean>(() => theme.global.name.value === ThemeType.Dark);
+
+const categoryDateRange = computed(() => ({
+    startMonth: query.value.trendChartStartYearMonth || '2024-01',
+    endMonth: query.value.trendChartEndYearMonth || '2024-12'
+}));
 
 const statisticsDataHasData = computed<boolean>(() => {
     if (analysisType.value === StatisticsAnalysisType.CategoricalAnalysis) {
         return !!categoricalAnalysisData.value && !!categoricalAnalysisData.value.items && categoricalAnalysisData.value.items.length > 0;
     } else if (analysisType.value === StatisticsAnalysisType.TrendAnalysis) {
         return !!trendsAnalysisData.value && !!trendsAnalysisData.value.items && trendsAnalysisData.value.items.length > 0 && !!monthlyTrendsChart.value;
+    } else if (analysisType.value === StatisticsAnalysisType.MonthlyCategorySpending) {
+        return !!monthlyCategoryData.value && monthlyCategoryData.value.length > 0;
     }
 
     return false;
@@ -498,6 +527,8 @@ const allChartTypes = computed<TypeAndDisplayName[]>(() => {
         return getAllCategoricalChartTypes();
     } else if (analysisType.value === StatisticsAnalysisType.TrendAnalysis) {
         return getAllTrendChartTypes();
+    } else if (analysisType.value === StatisticsAnalysisType.MonthlyCategorySpending) {
+        return [{ type: 0, displayName: tt('Bar Chart') }];
     } else {
         return [];
     }
@@ -559,6 +590,43 @@ function getFilterLinkUrl(): string {
 
 function getTransactionItemLinkUrl(itemId: string, dateRange?: TimeRangeAndDateType): string {
     return `/transaction/list?${statisticsStore.getTransactionListPageParams(analysisType.value, itemId, dateRange)}`;
+}
+
+function loadMonthlyCategorySpending(): Promise<void> {
+    return new Promise((resolve) => {
+        // Generate sample data for demonstration
+        const sampleData = [
+            { month: '2024-01', categoryId: '1', categoryName: 'Food & Dining', amount: 800 },
+            { month: '2024-01', categoryId: '2', categoryName: 'Transportation', amount: 300 },
+            { month: '2024-01', categoryId: '3', categoryName: 'Entertainment', amount: 200 },
+            { month: '2024-01', categoryId: '4', categoryName: 'Shopping', amount: 400 },
+            { month: '2024-02', categoryId: '1', categoryName: 'Food & Dining', amount: 750 },
+            { month: '2024-02', categoryId: '2', categoryName: 'Transportation', amount: 350 },
+            { month: '2024-02', categoryId: '3', categoryName: 'Entertainment', amount: 150 },
+            { month: '2024-02', categoryId: '4', categoryName: 'Shopping', amount: 500 },
+            { month: '2024-03', categoryId: '1', categoryName: 'Food & Dining', amount: 900 },
+            { month: '2024-03', categoryId: '2', categoryName: 'Transportation', amount: 280 },
+            { month: '2024-03', categoryId: '3', categoryName: 'Entertainment', amount: 300 },
+            { month: '2024-03', categoryId: '4', categoryName: 'Shopping', amount: 600 },
+            { month: '2024-04', categoryId: '1', categoryName: 'Food & Dining', amount: 850 },
+            { month: '2024-04', categoryId: '2', categoryName: 'Transportation', amount: 320 },
+            { month: '2024-04', categoryId: '3', categoryName: 'Entertainment', amount: 250 },
+            { month: '2024-04', categoryId: '4', categoryName: 'Shopping', amount: 450 },
+            { month: '2024-05', categoryId: '1', categoryName: 'Food & Dining', amount: 780 },
+            { month: '2024-05', categoryId: '2', categoryName: 'Transportation', amount: 290 },
+            { month: '2024-05', categoryId: '3', categoryName: 'Entertainment', amount: 180 },
+            { month: '2024-05', categoryId: '4', categoryName: 'Shopping', amount: 520 },
+            { month: '2024-06', categoryId: '1', categoryName: 'Food & Dining', amount: 820 },
+            { month: '2024-06', categoryId: '2', categoryName: 'Transportation', amount: 310 },
+            { month: '2024-06', categoryId: '3', categoryName: 'Entertainment', amount: 220 },
+            { month: '2024-06', categoryId: '4', categoryName: 'Shopping', amount: 380 }
+        ];
+        
+        monthlyCategoryData.value = sampleData;
+        selectedCategoryFilters.value = ['1', '2', '3', '4']; // All categories selected by default
+        
+        setTimeout(resolve, 100); // Simulate async loading
+    });
 }
 
 function init(initProps: TransactionStatisticsProps): void {
@@ -645,6 +713,8 @@ function init(initProps: TransactionStatisticsProps): void {
             return statisticsStore.loadTrendAnalysis({
                 force: false
             }) as Promise<unknown>;
+        } else if (analysisType.value === StatisticsAnalysisType.MonthlyCategorySpending) {
+            return loadMonthlyCategorySpending();
         } else {
             return Promise.reject('An error occurred');
         }
@@ -683,6 +753,8 @@ function reload(force: boolean): Promise<unknown> | null {
             dispatchPromise = statisticsStore.loadTrendAnalysis({
                 force: force
             });
+        } else if (analysisType.value === StatisticsAnalysisType.MonthlyCategorySpending) {
+            dispatchPromise = loadMonthlyCategorySpending();
         }
     } else if (query.value.chartDataType === ChartDataType.AccountTotalAssets.type ||
         query.value.chartDataType === ChartDataType.AccountTotalLiabilities.type) {
@@ -721,7 +793,7 @@ function setAnalysisType(type: StatisticsAnalysisType): void {
         });
     }
 
-    if (analysisType.value !== StatisticsAnalysisType.TrendAnalysis) {
+    if (analysisType.value !== StatisticsAnalysisType.TrendAnalysis && type !== StatisticsAnalysisType.MonthlyCategorySpending) {
         trendDateAggregationType.value = ChartDateAggregationType.Month.type;
     }
 

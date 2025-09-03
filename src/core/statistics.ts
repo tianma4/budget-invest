@@ -3,7 +3,8 @@ import { DateRange } from '@/core/datetime.ts';
 
 export enum StatisticsAnalysisType {
     CategoricalAnalysis = 0,
-    TrendAnalysis = 1
+    TrendAnalysis = 1,
+    MonthlyCategorySpending = 2
 }
 
 export class CategoricalChartType implements TypeAndName {
