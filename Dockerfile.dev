@@ -41,13 +41,15 @@ WORKDIR /go/src/github.com/mayswind/ezbookkeeping
 
 # Copy package files first for better caching
 COPY package*.json ./
-RUN npm ci --only=production
 
 # Copy source code
 COPY . .
 
-# Frontend pre-setup
+# Frontend pre-setup (removes package-lock.json)
 RUN docker/frontend-build-pre-setup.sh
+
+# Install dependencies with fresh lockfile
+RUN npm install --only=production
 
 # Install git for build process
 RUN apk add --no-cache git
