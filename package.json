@@ -70,11 +70,11 @@
     "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11",
-    "vite-plugin-checker": "^0.8.0",
-    "vite-plugin-pwa": "^0.20.5",
-    "vite-plugin-vuetify": "^2.0.4",
-    "vue-tsc": "^2.1.10"
+    "vite": "^5.4.0",
+    "vite-plugin-checker": "^0.7.2",
+    "vite-plugin-pwa": "^0.20.0",
+    "vite-plugin-vuetify": "^2.0.0",
+    "vue-tsc": "^2.1.0"
   },
   "browserslist": [
     "last 5 Chrome versions",
