@@ -23,7 +23,16 @@
                         />
                         <div class="d-flex justify-space-between text-caption mt-1">
                             <span>Current: {{ formatCurrency(fireMetrics.currentNetWorth) }}</span>
-                            <span>Target: {{ formatCurrency(fireMetrics.targetFIRENumber) }}</span>
+                            <span class="d-flex align-center">
+                                Target: {{ formatCurrency(fireMetrics.targetFIRENumber) }}
+                                <v-btn 
+                                    size="x-small" 
+                                    variant="text" 
+                                    :icon="mdiPencil" 
+                                    class="ms-1"
+                                    @click="openSettingsDialog"
+                                />
+                            </span>
                         </div>
                     </div>
 
@@ -318,6 +327,124 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <!-- Settings Dialog -->
+    <v-dialog v-model="showSettingsDialog" max-width="600px">
+        <v-card>
+            <v-card-title>
+                <span class="text-h5">{{ tt('Financial Planning Settings') }}</span>
+            </v-card-title>
+            <v-card-text>
+                <v-form>
+                    <v-row>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.currentAge"
+                                :label="tt('Current Age')"
+                                type="number"
+                                :rules="[v => !!v || 'Age is required', v => v > 0 && v < 120 || 'Invalid age']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.targetRetirementAge"
+                                :label="tt('Target Retirement Age')"
+                                type="number"
+                                :rules="[v => !!v || 'Retirement age is required', v => v > editableSettings.currentAge || 'Must be after current age']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.monthlyIncome"
+                                :label="tt('Monthly Income')"
+                                type="number"
+                                step="0.01"
+                                :prefix="tt('$')"
+                                :rules="[v => !!v || 'Income is required', v => v >= 0 || 'Income cannot be negative']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.monthlyExpenses"
+                                :label="tt('Monthly Expenses')"
+                                type="number"
+                                step="0.01"
+                                :prefix="tt('$')"
+                                :rules="[v => !!v || 'Expenses are required', v => v >= 0 || 'Expenses cannot be negative']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.emergencyFundMonths"
+                                :label="tt('Emergency Fund (Months)')"
+                                type="number"
+                                step="0.5"
+                                :rules="[v => !!v || 'Emergency fund months is required', v => v >= 3 && v <= 12 || 'Between 3-12 months recommended']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.expectedAnnualReturn"
+                                :label="tt('Expected Annual Return (%)')"
+                                type="number"
+                                step="0.1"
+                                :suffix="tt('%')"
+                                :rules="[v => !!v || 'Annual return is required', v => v >= 0 && v <= 20 || 'Return should be 0-20%']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                    </v-row>
+                    
+                    <v-divider class="my-4" />
+                    
+                    <div class="text-subtitle-1 mb-3">{{ tt('FIRE Calculation') }}</div>
+                    <v-alert type="info" density="compact" class="mb-3">
+                        {{ tt('Target FIRE Number is calculated as 25x your annual expenses') }}
+                        ({{ formatCurrency(parseFloat(editableSettings.monthlyExpenses) * 12 * 25 * 100) }})
+                    </v-alert>
+                    
+                    <v-row>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.safeWithdrawalRate"
+                                :label="tt('Safe Withdrawal Rate (%)')"
+                                type="number"
+                                step="0.1"
+                                :suffix="tt('%')"
+                                :rules="[v => !!v || 'Withdrawal rate is required', v => v >= 2 && v <= 6 || 'Rate should be 2-6%']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="editableSettings.inflationRate"
+                                :label="tt('Inflation Rate (%)')"
+                                type="number"
+                                step="0.1"
+                                :suffix="tt('%')"
+                                :rules="[v => !!v || 'Inflation rate is required', v => v >= 0 && v <= 10 || 'Rate should be 0-10%']"
+                                class="mb-3"
+                            />
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn color="grey" variant="text" @click="cancelSettings">
+                    {{ tt('Cancel') }}
+                </v-btn>
+                <v-btn color="primary" variant="elevated" @click="saveSettings">
+                    {{ tt('Save Settings') }}
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -332,7 +459,8 @@ import {
     mdiPlus,
     mdiFlag,
     mdiLightbulbOnOutline,
-    mdiCheckCircleOutline
+    mdiCheckCircleOutline,
+    mdiPencil
 } from '@mdi/js';
 
 const { tt, formatAmountToLocalizedNumeralsWithCurrency } = useI18n();
@@ -358,6 +486,19 @@ const newGoal = ref({
     currentAmount: '0',
     targetDate: '',
     monthlyContribution: '0'
+});
+
+// Settings dialog
+const showSettingsDialog = ref(false);
+const editableSettings = ref({
+    currentAge: '',
+    targetRetirementAge: '',
+    monthlyIncome: '',
+    monthlyExpenses: '',
+    emergencyFundMonths: '',
+    expectedAnnualReturn: '',
+    safeWithdrawalRate: '',
+    inflationRate: ''
 });
 
 // Chart data (show every 2 years for readability)
@@ -398,6 +539,42 @@ const fireTargetY = computed(() => {
     return chartHeight - chartPadding - ((targetValue - minValue) / range) * (chartHeight - 2 * chartPadding);
 });
 
+// Initialize settings with current values
+const initializeSettings = () => {
+    const profile = financialPlanningStore.userProfile;
+    editableSettings.value = {
+        currentAge: profile.currentAge.toString(),
+        targetRetirementAge: profile.targetRetirementAge.toString(),
+        monthlyIncome: (profile.monthlyIncome / 100).toString(), // Convert from cents
+        monthlyExpenses: (profile.monthlyExpenses / 100).toString(), // Convert from cents
+        emergencyFundMonths: profile.emergencyFundMonths.toString(),
+        expectedAnnualReturn: (profile.expectedAnnualReturn * 100).toString(), // Convert to percentage
+        safeWithdrawalRate: (profile.safeWithdrawalRate * 100).toString(), // Convert to percentage
+        inflationRate: (profile.inflationRate * 100).toString() // Convert to percentage
+    };
+};
+
+// Save settings function
+const saveSettings = () => {
+    financialPlanningStore.updateUserProfile({
+        currentAge: parseInt(editableSettings.value.currentAge),
+        targetRetirementAge: parseInt(editableSettings.value.targetRetirementAge),
+        monthlyIncome: parseFloat(editableSettings.value.monthlyIncome) * 100, // Convert to cents
+        monthlyExpenses: parseFloat(editableSettings.value.monthlyExpenses) * 100, // Convert to cents
+        emergencyFundMonths: parseFloat(editableSettings.value.emergencyFundMonths),
+        expectedAnnualReturn: parseFloat(editableSettings.value.expectedAnnualReturn) / 100, // Convert from percentage
+        safeWithdrawalRate: parseFloat(editableSettings.value.safeWithdrawalRate) / 100, // Convert from percentage
+        inflationRate: parseFloat(editableSettings.value.inflationRate) / 100 // Convert from percentage
+    });
+    showSettingsDialog.value = false;
+};
+
+// Cancel settings function
+const cancelSettings = () => {
+    showSettingsDialog.value = false;
+    initializeSettings(); // Reset to original values
+};
+
 // Add goal function
 const addNewGoal = () => {
     if (!newGoal.value.title || !newGoal.value.targetAmount || !newGoal.value.targetDate) {
@@ -407,9 +584,9 @@ const addNewGoal = () => {
     financialPlanningStore.addGoal({
         title: newGoal.value.title,
         targetAmount: parseFloat(newGoal.value.targetAmount) * 100, // Convert to cents
-        currentAmount: parseFloat(newGoal.value.currentAmount) * 100, // Convert to cents
+        currentAmount: parseFloat(newGoal.value.currentAmount || '0') * 100, // Convert to cents
         targetDate: new Date(newGoal.value.targetDate),
-        monthlyContribution: parseFloat(newGoal.value.monthlyContribution) * 100 // Convert to cents
+        monthlyContribution: parseFloat(newGoal.value.monthlyContribution || '0') * 100 // Convert to cents
     });
     
     // Reset form
@@ -422,6 +599,12 @@ const addNewGoal = () => {
     };
     
     showAddGoalDialog.value = false;
+};
+
+// Open settings dialog
+const openSettingsDialog = () => {
+    initializeSettings();
+    showSettingsDialog.value = true;
 };
 
 // Helper functions
