@@ -500,7 +500,7 @@ const showFilterCategoryDialog = ref<boolean>(false);
 const showFilterTagDialog = ref<boolean>(false);
 
 // Monthly category spending data
-const monthlyCategoryData = ref<any[]>([]);
+const monthlyCategoryData = ref<Record<string, unknown>[]>([]);
 const selectedCategoryFilters = ref<string[]>([]);
 
 const isDarkMode = computed<boolean>(() => theme.global.name.value === ThemeType.Dark);

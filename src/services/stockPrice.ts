@@ -7,6 +7,7 @@ export interface StockQuote {
   change: number;
   changePercent: number;
   lastUpdate: number;
+  isValid?: boolean;
 }
 
 export interface StockPriceResponse {
@@ -18,7 +19,6 @@ export interface StockPriceResponse {
 }
 
 class StockPriceService {
-  private baseUrl = 'https://query1.finance.yahoo.com/v8/finance/chart';
   private cache = new Map<string, { data: StockQuote; expiry: number }>();
   private cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
 
@@ -30,40 +30,36 @@ class StockPriceService {
         return cached.data;
       }
 
-      const response = await fetch(`${this.baseUrl}/${symbol}?interval=1m&range=1d`);
+      // Use backend proxy endpoint instead of direct API calls
+      const response = await fetch('/api/v1/stock_prices/quote.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.getAuthToken()}`
+        },
+        body: JSON.stringify({
+          symbol: symbol.toUpperCase()
+        })
+      });
       
       if (!response.ok) {
-        console.warn(`Failed to fetch stock price for ${symbol}: ${response.status}`);
+        console.warn(`Backend stock price API failed for ${symbol}: ${response.status}`);
         return null;
       }
 
       const data = await response.json();
       
-      if (!data.chart?.result?.[0]) {
-        console.warn(`No data found for symbol ${symbol}`);
+      if (!data.success || !data.data) {
+        console.warn(`Invalid response from backend for ${symbol}`);
         return null;
       }
-
-      const result = data.chart.result[0];
-      const meta = result.meta;
-      const quote = result.indicators?.quote?.[0];
-      
-      if (!meta || !quote) {
-        console.warn(`Invalid data structure for symbol ${symbol}`);
-        return null;
-      }
-
-      const currentPrice = meta.regularMarketPrice || meta.previousClose;
-      const previousClose = meta.previousClose;
-      const change = currentPrice - previousClose;
-      const changePercent = (change / previousClose) * 100;
 
       const stockQuote: StockQuote = {
-        symbol: symbol.toUpperCase(),
-        price: Math.round(currentPrice * 100), // Convert to cents
-        change: Math.round(change * 100), // Convert to cents
-        changePercent: parseFloat(changePercent.toFixed(2)),
-        lastUpdate: Date.now()
+        symbol: data.data.symbol,
+        price: data.data.price,
+        change: data.data.change,
+        changePercent: data.data.changePercent,
+        lastUpdate: data.data.lastUpdate
       };
 
       // Cache the result
@@ -79,7 +75,65 @@ class StockPriceService {
     }
   }
 
+  private getAuthToken(): string {
+    // Get token from localStorage or store
+    const token = localStorage.getItem('ezbookkeeping_token') || '';
+    return token;
+  }
+
   async getMultipleStockPrices(symbols: string[]): Promise<Map<string, StockQuote>> {
+    const results = new Map<string, StockQuote>();
+    
+    try {
+      // Use backend bulk endpoint for efficiency
+      const symbolsString = symbols.map(s => s.toUpperCase()).join(',');
+      
+      const response = await fetch('/api/v1/stock_prices/quotes.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.getAuthToken()}`
+        },
+        body: JSON.stringify({
+          symbols: symbolsString
+        })
+      });
+      
+      if (!response.ok) {
+        console.warn(`Backend bulk stock price API failed: ${response.status}`);
+        // Fallback to individual requests
+        return await this.fallbackToIndividualRequests(symbols);
+      }
+
+      const data = await response.json();
+      
+      if (!data.success || !data.data || !data.data.quotes) {
+        console.warn('Invalid bulk response from backend');
+        return await this.fallbackToIndividualRequests(symbols);
+      }
+
+      // Convert backend response to Map
+      Object.entries(data.data.quotes).forEach(([symbol, quote]) => {
+        const stockQuote = quote as StockQuote;
+        if (stockQuote.isValid) {
+          results.set(symbol.toUpperCase(), stockQuote);
+          // Cache individual results
+          this.cache.set(symbol, {
+            data: stockQuote,
+            expiry: Date.now() + this.cacheTimeout
+          });
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching bulk stock prices:', error);
+      return await this.fallbackToIndividualRequests(symbols);
+    }
+
+    return results;
+  }
+
+  private async fallbackToIndividualRequests(symbols: string[]): Promise<Map<string, StockQuote>> {
     const results = new Map<string, StockQuote>();
     
     // Process in batches to avoid overwhelming the API
@@ -109,41 +163,10 @@ class StockPriceService {
     return results;
   }
 
-  // Alternative method using a different API if Yahoo Finance fails
+  // Legacy alternative method - now handled by backend
   async getStockPriceAlternative(symbol: string): Promise<StockQuote | null> {
-    try {
-      // Using Financial Modeling Prep API (free tier available)
-      const apiKey = 'demo'; // Replace with actual API key for production
-      const response = await fetch(
-        `https://financialmodelingprep.com/api/v3/quote-short/${symbol}?apikey=${apiKey}`
-      );
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-      
-      if (!Array.isArray(data) || data.length === 0) {
-        return null;
-      }
-
-      const quote = data[0];
-      const price = quote.price;
-      const change = quote.change || 0;
-      const changePercent = quote.changesPercentage || 0;
-
-      return {
-        symbol: symbol.toUpperCase(),
-        price: Math.round(price * 100), // Convert to cents
-        change: Math.round(change * 100), // Convert to cents
-        changePercent: parseFloat(changePercent.toFixed(2)),
-        lastUpdate: Date.now()
-      };
-    } catch (error) {
-      console.error(`Error fetching stock price from alternative API for ${symbol}:`, error);
-      return null;
-    }
+    console.warn('getStockPriceAlternative is deprecated, using backend proxy instead');
+    return this.getStockPrice(symbol);
   }
 
   clearCache(): void {

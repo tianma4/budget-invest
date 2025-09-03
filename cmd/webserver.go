@@ -403,6 +403,10 @@ func startWebServer(c *core.CliContext) error {
 
 			// System
 			apiV1Route.GET("/systems/version.json", bindApi(api.Systems.VersionHandler))
+
+			// Stock Prices
+			apiV1Route.POST("/stock_prices/quote.json", bindApi(api.StockPrices.StockQuoteHandler))
+			apiV1Route.POST("/stock_prices/quotes.json", bindApi(api.StockPrices.MultiStockQuoteHandler))
 		}
 	}
 

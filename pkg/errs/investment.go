@@ -17,6 +17,10 @@ var (
 	ErrInsufficientShares          = NewNormalError(NormalSubcategoryInvestment, 8, 400, "Insufficient shares for this transaction")
 	
 	// Stock Price
-	ErrStockPriceNotFound          = NewNormalError(NormalSubcategoryInvestment, 101, 400, "Stock price not found")
-	ErrStockPriceServiceUnavailable = NewNormalError(NormalSubcategoryInvestment, 102, 503, "Stock price service unavailable")
+	ErrSymbolIsRequired            = NewNormalError(NormalSubcategoryInvestment, 101, 400, "Symbol is required")
+	ErrSymbolsRequired             = NewNormalError(NormalSubcategoryInvestment, 102, 400, "Symbols are required")
+	ErrStockQuoteNotFound          = NewNormalError(NormalSubcategoryInvestment, 103, 400, "Stock quote not found")
+	ErrStockQuoteFetchFailed       = NewNormalError(NormalSubcategoryInvestment, 104, 503, "Failed to fetch stock quote")
+	ErrStockPriceNotFound          = NewNormalError(NormalSubcategoryInvestment, 105, 400, "Stock price not found")
+	ErrStockPriceServiceUnavailable = NewNormalError(NormalSubcategoryInvestment, 106, 503, "Stock price service unavailable")
 )
