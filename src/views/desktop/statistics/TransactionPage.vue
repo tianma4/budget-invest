@@ -499,8 +499,15 @@ const showFilterAccountDialog = ref<boolean>(false);
 const showFilterCategoryDialog = ref<boolean>(false);
 const showFilterTagDialog = ref<boolean>(false);
 
-// Monthly category spending data
-const monthlyCategoryData = ref<Record<string, unknown>[]>([]);
+// Monthly category spending data interface
+interface CategorySpendingData {
+    month: string;
+    categoryId: string;
+    categoryName: string;
+    amount: number;
+}
+
+const monthlyCategoryData = ref<CategorySpendingData[]>([]);
 const selectedCategoryFilters = ref<string[]>([]);
 
 const isDarkMode = computed<boolean>(() => theme.global.name.value === ThemeType.Dark);
