@@ -15,7 +15,8 @@
     "serve": "cross-env NODE_ENV=development vite",
     "build": "cross-env NODE_ENV=production vite build",
     "serve:dist": "vite preview",
-    "lint": "vue-tsc --noEmit && eslint . --fix",
+    "lint": "eslint . --fix",
+    "type-check": "vue-tsc --noEmit",
     "test": "cross-env TS_NODE_PROJECT=\"./tsconfig.jest.json\" jest"
   },
   "dependencies": {
@@ -68,12 +69,12 @@
     "sass": "^1.89.1",
     "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5",
-    "vite-plugin-checker": "^0.9.3",
-    "vite-plugin-pwa": "^1.0.0",
-    "vite-plugin-vuetify": "^2.1.1",
-    "vue-tsc": "^2.2.10"
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-checker": "^0.8.0",
+    "vite-plugin-pwa": "^0.20.5",
+    "vite-plugin-vuetify": "^2.0.4",
+    "vue-tsc": "^2.1.10"
   },
   "browserslist": [
     "last 5 Chrome versions",
