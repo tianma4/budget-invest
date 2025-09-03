@@ -8,7 +8,6 @@ import { useTheme } from 'vuetify';
 import type { CallbackDataParams } from 'echarts/types/dist/shared';
 
 import { useI18n } from '@/locales/helpers.ts';
-import { useUserStore } from '@/stores/user.ts';
 import { useTransactionCategoriesStore } from '@/stores/transactionCategory.ts';
 
 import { ThemeType } from '@/core/theme.ts';
@@ -43,12 +42,7 @@ const props = defineProps<{
     };
 }>();
 
-const emit = defineEmits<{
-    (e: 'categoryFilter', categories: string[]): void;
-}>();
-
 const theme = useTheme();
-const userStore = useUserStore();
 const categoriesStore = useTransactionCategoriesStore();
 
 const {
