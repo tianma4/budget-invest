@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useDisplay } from 'vuetify';
 
 import {
@@ -226,8 +226,10 @@ const loadInvestments = async () => {
 const refreshPrices = async () => {
     loading.value = true;
     try {
-        // TODO: Call API to refresh prices
-        await loadInvestments();
+        await investmentStore.refreshStockPrices();
+    } catch (error) {
+        console.error('Failed to refresh prices:', error);
+        // TODO: Show error notification to user
     } finally {
         loading.value = false;
     }
@@ -262,9 +264,37 @@ const onTransactionAdded = () => {
     // loadInvestments();
 };
 
+// Auto-refresh prices periodically
+let refreshInterval: NodeJS.Timeout | null = null;
+
+const startPriceRefresh = () => {
+    // Refresh prices every 5 minutes
+    refreshInterval = setInterval(async () => {
+        try {
+            await investmentStore.refreshStockPrices();
+        } catch (error) {
+            console.error('Auto refresh failed:', error);
+        }
+    }, 5 * 60 * 1000);
+};
+
+const stopPriceRefresh = () => {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+};
+
 // Lifecycle
-onMounted(() => {
-    loadInvestments();
+onMounted(async () => {
+    await loadInvestments();
+    
+    // Start automatic price refresh after initial load
+    setTimeout(startPriceRefresh, 2000);
+});
+
+onUnmounted(() => {
+    stopPriceRefresh();
 });
 </script>
 

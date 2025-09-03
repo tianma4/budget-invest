@@ -9,6 +9,7 @@ import type { HiddenAmount, NumberWithSuffix } from '@/core/numeral.ts';
 import { DISPLAY_HIDDEN_AMOUNT } from '@/consts/numeral.ts';
 
 import { isNumber } from '@/lib/common.ts';
+import { stockPriceService } from '@/services/stockPrice.ts';
 
 export interface Investment {
     investmentId: string;
@@ -400,6 +401,55 @@ export const useInvestmentStore = defineStore('investments', () => {
         selectedTimePeriod.value = period;
     }
 
+    async function refreshStockPrices(): Promise<void> {
+        try {
+            if (investments.value.length === 0) {
+                return;
+            }
+
+            // Get unique ticker symbols
+            const symbols = [...new Set(investments.value.map(inv => inv.tickerSymbol))];
+            
+            // Fetch current prices
+            const stockPrices = await stockPriceService.getMultipleStockPrices(symbols);
+            
+            let hasUpdates = false;
+            
+            // Update investments with new prices
+            investments.value.forEach(investment => {
+                const stockQuote = stockPrices.get(investment.tickerSymbol.toUpperCase());
+                
+                if (stockQuote) {
+                    // Update current price
+                    investment.currentPrice = stockQuote.price;
+                    investment.lastPriceUpdate = stockQuote.lastUpdate;
+                    
+                    // Recalculate current value and gains/losses
+                    investment.currentValue = Math.round(investment.sharesOwned * investment.currentPrice);
+                    investment.gainLoss = investment.currentValue - investment.totalInvested;
+                    investment.gainLossPct = investment.totalInvested > 0 ? 
+                        (investment.gainLoss / investment.totalInvested) * 100 : 0;
+                    
+                    hasUpdates = true;
+                }
+            });
+            
+            if (hasUpdates) {
+                // Save updated investments to localStorage
+                for (const investment of investments.value) {
+                    await saveInvestment(investment);
+                }
+                
+                // Update portfolio summary
+                updatePortfolioSummary();
+            }
+            
+        } catch (error) {
+            console.error('Failed to refresh stock prices:', error);
+            throw error;
+        }
+    }
+
     // Computed properties for display values to ensure reactivity
     const portfolioSummaryDisplay = computed(() => {
         const { formatAmountToLocalizedNumeralsWithCurrency } = useI18n();
@@ -463,6 +513,7 @@ export const useInvestmentStore = defineStore('investments', () => {
         updateInvestmentWithTransaction,
         deleteInvestment,
         setTimePeriod,
-        generateMockPerformanceData
+        generateMockPerformanceData,
+        refreshStockPrices
     };
 });
