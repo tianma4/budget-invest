@@ -164,6 +164,7 @@
 import { ref, computed, watch } from 'vue';
 import { mdiTrendingUp, mdiTrendingDown } from '@mdi/js';
 import { useI18n } from '@/locales/helpers.ts';
+import { useInvestmentStore } from '@/stores/investment.ts';
 
 interface Props {
     show: boolean;
@@ -192,6 +193,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const { tt } = useI18n();
+const investmentStore = useInvestmentStore();
 
 // Form data
 const form = ref();
@@ -250,21 +252,20 @@ const onSubmit = async () => {
     
     submitting.value = true;
     try {
-        // TODO: Replace with actual API call
-        // await investmentApi.addTransaction({
-        //     investmentId: props.investment.investmentId,
-        //     type: formData.value.transactionType === 'buy' ? 1 : 2,
-        //     shares: parseFloat(String(formData.value.shares)),
-        //     pricePerShare: parseFloat(String(formData.value.pricePerShare)),
-        //     fees: parseFloat(String(formData.value.fees)) || 0,
-        //     transactionDate: new Date(formData.value.transactionDate).getTime(),
-        //     comment: formData.value.comment
-        // });
+        // Process the buy/sell transaction
+        const shares = parseFloat(String(formData.value.shares));
+        const pricePerShare = parseFloat(String(formData.value.pricePerShare));
+        const fees = parseFloat(String(formData.value.fees)) || 0;
+        const isBuy = formData.value.transactionType === 'buy';
         
-        // Mock success
-        console.log('Creating transaction:', {
-            investment: props.investment.investmentId,
-            ...formData.value
+        // Update the investment with the new transaction
+        await investmentStore.updateInvestmentWithTransaction(props.investment.investmentId, {
+            type: isBuy ? 'buy' : 'sell',
+            shares: shares,
+            pricePerShare: pricePerShare,
+            fees: fees,
+            transactionDate: new Date(formData.value.transactionDate),
+            comment: formData.value.comment
         });
         
         emit('added');

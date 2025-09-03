@@ -257,7 +257,8 @@ const onInvestmentUpdated = () => {
 };
 
 const onTransactionAdded = () => {
-    loadInvestments();
+    // Store already reloads itself after transaction, no need to reload again
+    // loadInvestments();
 };
 
 // Lifecycle

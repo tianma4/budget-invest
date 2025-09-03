@@ -269,6 +269,64 @@ export const useInvestmentStore = defineStore('investments', () => {
         }
     }
 
+    async function updateInvestmentWithTransaction(investmentId: string, transaction: {
+        type: 'buy' | 'sell';
+        shares: number;
+        pricePerShare: number;
+        fees: number;
+        transactionDate: Date;
+        comment?: string;
+    }): Promise<void> {
+        try {
+            const investment = investments.value.find(inv => inv.investmentId === investmentId);
+            if (!investment) {
+                throw new Error('Investment not found');
+            }
+
+            const priceInCents = Math.round(transaction.pricePerShare * 100);
+            const feesInCents = Math.round(transaction.fees * 100);
+            const totalAmount = Math.round(transaction.shares * transaction.pricePerShare * 100) + feesInCents;
+
+            if (transaction.type === 'buy') {
+                // Calculate new average cost per share
+                const currentTotalCost = investment.sharesOwned * investment.avgCostPerShare;
+                const newTotalCost = currentTotalCost + totalAmount;
+                const newTotalShares = investment.sharesOwned + transaction.shares;
+                
+                investment.sharesOwned = newTotalShares;
+                investment.avgCostPerShare = Math.round(newTotalCost / newTotalShares);
+                investment.totalInvested += totalAmount;
+            } else { // sell
+                if (transaction.shares > investment.sharesOwned) {
+                    throw new Error('Cannot sell more shares than owned');
+                }
+                
+                investment.sharesOwned -= transaction.shares;
+                const proportionSold = transaction.shares / (investment.sharesOwned + transaction.shares);
+                investment.totalInvested -= Math.round(investment.totalInvested * proportionSold);
+            }
+
+            // Update current price to the transaction price (real market data)
+            investment.currentPrice = priceInCents;
+            
+            // Update current value based on current price
+            investment.currentValue = Math.round(investment.sharesOwned * investment.currentPrice);
+            investment.gainLoss = investment.currentValue - investment.totalInvested;
+            investment.gainLossPct = investment.totalInvested > 0 ? 
+                (investment.gainLoss / investment.totalInvested) * 100 : 0;
+            investment.lastPriceUpdate = Date.now();
+
+            // Save updated investment to storage
+            await saveInvestment(investment);
+            
+            // Reload investments to ensure reactivity
+            await loadAllInvestments();
+        } catch (error) {
+            console.error('Failed to update investment with transaction:', error);
+            throw error;
+        }
+    }
+
     function updatePortfolioSummary() {
         const totalInvested = investments.value.reduce((sum, inv) => sum + inv.totalInvested, 0);
         const currentValue = investments.value.reduce((sum, inv) => sum + inv.currentValue, 0);
@@ -402,6 +460,7 @@ export const useInvestmentStore = defineStore('investments', () => {
         loadAllInvestments,
         updatePortfolioSummary,
         addInvestment,
+        updateInvestmentWithTransaction,
         deleteInvestment,
         setTimePeriod,
         generateMockPerformanceData

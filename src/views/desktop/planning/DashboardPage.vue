@@ -192,7 +192,7 @@
                         <v-icon :icon="mdiTargetVariant" class="me-2" color="primary" />
                         <span>{{ tt('Financial Goals') }}</span>
                     </div>
-                    <v-btn size="small" variant="text" :prepend-icon="mdiPlus">
+                    <v-btn size="small" variant="text" :prepend-icon="mdiPlus" @click="showAddGoalDialog = true">
                         {{ tt('Add Goal') }}
                     </v-btn>
                 </v-card-title>
@@ -255,6 +255,69 @@
             </v-card>
         </v-col>
     </v-row>
+
+    <!-- Add Goal Dialog -->
+    <v-dialog v-model="showAddGoalDialog" max-width="500px">
+        <v-card>
+            <v-card-title>
+                <span class="text-h5">{{ tt('Add Financial Goal') }}</span>
+            </v-card-title>
+            <v-card-text>
+                <v-form @submit.prevent="addNewGoal">
+                    <v-text-field
+                        v-model="newGoal.title"
+                        :label="tt('Goal Title')"
+                        :rules="[v => !!v || 'Goal title is required']"
+                        class="mb-3"
+                    />
+                    
+                    <v-text-field
+                        v-model="newGoal.targetAmount"
+                        :label="tt('Target Amount')"
+                        type="number"
+                        step="0.01"
+                        :rules="[v => !!v || 'Target amount is required', v => v > 0 || 'Amount must be positive']"
+                        class="mb-3"
+                    />
+                    
+                    <v-text-field
+                        v-model="newGoal.currentAmount"
+                        :label="tt('Current Amount')"
+                        type="number"
+                        step="0.01"
+                        :rules="[v => v >= 0 || 'Amount cannot be negative']"
+                        class="mb-3"
+                    />
+                    
+                    <v-text-field
+                        v-model="newGoal.targetDate"
+                        :label="tt('Target Date')"
+                        type="date"
+                        :rules="[v => !!v || 'Target date is required']"
+                        class="mb-3"
+                    />
+                    
+                    <v-text-field
+                        v-model="newGoal.monthlyContribution"
+                        :label="tt('Monthly Contribution')"
+                        type="number"
+                        step="0.01"
+                        :rules="[v => v >= 0 || 'Amount cannot be negative']"
+                        class="mb-3"
+                    />
+                </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn color="grey" variant="text" @click="showAddGoalDialog = false">
+                    {{ tt('Cancel') }}
+                </v-btn>
+                <v-btn color="primary" variant="elevated" @click="addNewGoal">
+                    {{ tt('Add Goal') }}
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -286,6 +349,16 @@ const budgetFlow = computed(() => financialPlanningStore.budgetToInvestmentFlow)
 const goals = computed(() => financialPlanningStore.goals);
 const retirementProjections = computed(() => financialPlanningStore.retirementProjections);
 const optimizationSuggestions = computed(() => financialPlanningStore.savingsOptimization);
+
+// Add Goal dialog
+const showAddGoalDialog = ref(false);
+const newGoal = ref({
+    title: '',
+    targetAmount: '',
+    currentAmount: '0',
+    targetDate: '',
+    monthlyContribution: '0'
+});
 
 // Chart data (show every 2 years for readability)
 const displayedProjections = computed(() => {
@@ -324,6 +397,32 @@ const fireTargetY = computed(() => {
     const targetValue = fireMetrics.value.targetFIRENumber;
     return chartHeight - chartPadding - ((targetValue - minValue) / range) * (chartHeight - 2 * chartPadding);
 });
+
+// Add goal function
+const addNewGoal = () => {
+    if (!newGoal.value.title || !newGoal.value.targetAmount || !newGoal.value.targetDate) {
+        return;
+    }
+    
+    financialPlanningStore.addGoal({
+        title: newGoal.value.title,
+        targetAmount: parseFloat(newGoal.value.targetAmount) * 100, // Convert to cents
+        currentAmount: parseFloat(newGoal.value.currentAmount) * 100, // Convert to cents
+        targetDate: new Date(newGoal.value.targetDate),
+        monthlyContribution: parseFloat(newGoal.value.monthlyContribution) * 100 // Convert to cents
+    });
+    
+    // Reset form
+    newGoal.value = {
+        title: '',
+        targetAmount: '',
+        currentAmount: '0',
+        targetDate: '',
+        monthlyContribution: '0'
+    };
+    
+    showAddGoalDialog.value = false;
+};
 
 // Helper functions
 const formatCurrency = (amount: number) => {

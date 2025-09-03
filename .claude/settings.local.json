@@ -30,7 +30,10 @@
       "Bash(./dev-stop.sh:*)",
       "Bash(lsof:*)",
       "Bash(./dev-start.sh:*)",
-      "Bash(./dev-logs.sh:*)"
+      "Bash(./dev-logs.sh:*)",
+      "Bash(grep:*)",
+      "Bash(gh run list:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []
