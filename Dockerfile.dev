@@ -45,11 +45,14 @@ COPY package*.json ./
 # Copy source code
 COPY . .
 
-# Frontend pre-setup (removes package-lock.json)
+# Frontend pre-setup (removes package-lock.json and node_modules)
 RUN docker/frontend-build-pre-setup.sh
 
-# Install dependencies with fresh lockfile
-RUN npm install --only=production
+# Install dependencies with fresh lockfile (include dev dependencies for build)
+RUN npm install
+
+# Fix for Rollup ARM64 musl binary issue - install specific rollup binary
+RUN npm install @rollup/rollup-linux-arm64-musl || echo "Rollup ARM64 binary not available, continuing with JS fallback"
 
 # Install git for build process
 RUN apk add --no-cache git
