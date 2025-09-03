@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, readonly } from 'vue';
 import { defineStore } from 'pinia';
 
 import { useUserStore } from './user.ts';
@@ -67,6 +67,12 @@ export const useInvestmentStore = defineStore('investments', () => {
         totalGainLossPct: 0,
         currency: 'USD'
     });
+
+    // Real-time price update state
+    const isRefreshingPrices = ref(false);
+    const lastPriceRefresh = ref<number>(0);
+    const priceRefreshInterval = ref<NodeJS.Timeout | null>(null);
+    const PRICE_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
     // TODO: Replace with actual API calls when backend investment endpoints are implemented
     // For now, using localStorage as temporary persistence until backend APIs are available
@@ -263,6 +269,11 @@ export const useInvestmentStore = defineStore('investments', () => {
             investments.value.push(newInvestment);
             updatePortfolioSummary();
             
+            // Start price refresh if this is the first investment
+            if (investments.value.length === 1) {
+                startPriceRefresh();
+            }
+            
             return newInvestment;
         } catch (error) {
             console.error('Failed to add investment:', error);
@@ -401,14 +412,23 @@ export const useInvestmentStore = defineStore('investments', () => {
         selectedTimePeriod.value = period;
     }
 
-    async function refreshStockPrices(): Promise<void> {
+    async function refreshStockPrices(force = false): Promise<void> {
         try {
             if (investments.value.length === 0) {
                 return;
             }
 
+            // Prevent concurrent refreshes unless forced
+            if (isRefreshingPrices.value && !force) {
+                return;
+            }
+
+            isRefreshingPrices.value = true;
+
             // Get unique ticker symbols
             const symbols = [...new Set(investments.value.map(inv => inv.tickerSymbol))];
+            
+            console.log(`Refreshing stock prices for ${symbols.length} symbols: ${symbols.join(', ')}`);
             
             // Fetch current prices
             const stockPrices = await stockPriceService.getMultipleStockPrices(symbols);
@@ -431,6 +451,8 @@ export const useInvestmentStore = defineStore('investments', () => {
                         (investment.gainLoss / investment.totalInvested) * 100 : 0;
                     
                     hasUpdates = true;
+                    
+                    console.log(`Updated ${investment.tickerSymbol}: $${(stockQuote.price / 100).toFixed(2)} (${stockQuote.changePercent >= 0 ? '+' : ''}${stockQuote.changePercent.toFixed(2)}%)`);
                 }
             });
             
@@ -442,11 +464,16 @@ export const useInvestmentStore = defineStore('investments', () => {
                 
                 // Update portfolio summary
                 updatePortfolioSummary();
+                
+                lastPriceRefresh.value = Date.now();
+                console.log(`Stock prices updated at ${new Date().toLocaleTimeString()}`);
             }
             
         } catch (error) {
             console.error('Failed to refresh stock prices:', error);
             throw error;
+        } finally {
+            isRefreshingPrices.value = false;
         }
     }
 
@@ -495,8 +522,37 @@ export const useInvestmentStore = defineStore('investments', () => {
         };
     });
 
-    // Initialize with stored data
-    loadAllInvestments();
+    // Auto-refresh functions
+    function startPriceRefresh(): void {
+        // Clear any existing interval
+        stopPriceRefresh();
+        
+        // Start immediate refresh
+        refreshStockPrices(true);
+        
+        // Set up periodic refresh
+        priceRefreshInterval.value = setInterval(() => {
+            refreshStockPrices();
+        }, PRICE_REFRESH_INTERVAL);
+        
+        console.log(`Started automatic stock price refresh every ${PRICE_REFRESH_INTERVAL / 1000 / 60} minutes`);
+    }
+
+    function stopPriceRefresh(): void {
+        if (priceRefreshInterval.value) {
+            clearInterval(priceRefreshInterval.value);
+            priceRefreshInterval.value = null;
+            console.log('Stopped automatic stock price refresh');
+        }
+    }
+
+    // Initialize with stored data and start price refresh
+    loadAllInvestments().then(() => {
+        // Start automatic price refresh if we have investments
+        if (investments.value.length > 0) {
+            startPriceRefresh();
+        }
+    });
 
     return {
         investments,
@@ -506,6 +562,8 @@ export const useInvestmentStore = defineStore('investments', () => {
         currentPerformanceData,
         performanceSummary,
         allInvestments,
+        isRefreshingPrices: readonly(isRefreshingPrices),
+        lastPriceRefresh: readonly(lastPriceRefresh),
         getTotalInvestmentValue,
         loadAllInvestments,
         updatePortfolioSummary,
@@ -514,6 +572,8 @@ export const useInvestmentStore = defineStore('investments', () => {
         deleteInvestment,
         setTimePeriod,
         generateMockPerformanceData,
-        refreshStockPrices
+        refreshStockPrices,
+        startPriceRefresh,
+        stopPriceRefresh
     };
 });

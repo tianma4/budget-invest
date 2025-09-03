@@ -24,9 +24,14 @@
                                     <div class="text-h6 font-weight-bold mb-3">{{ portfolioSummary.currentValueDisplay }}</div>
                                     
                                     <div class="text-body-2 text-medium-emphasis mb-1">{{ tt('Total P&L') }}</div>
-                                    <div class="text-h6 font-weight-bold" 
+                                    <div class="text-h6 font-weight-bold mb-3" 
                                          :class="portfolioSummary.totalGainLoss >= 0 ? 'text-success' : 'text-error'">
                                         {{ portfolioSummary.totalGainLossDisplay }} ({{ portfolioSummary.totalGainLossPct.toFixed(2) }}%)
+                                    </div>
+                                    
+                                    <div class="text-caption text-medium-emphasis" v-if="lastPriceRefresh > 0">
+                                        {{ tt('Last updated:') }} {{ formatLastRefreshTime(lastPriceRefresh) }}
+                                        <v-icon v-if="isRefreshingPrices" size="14" class="ms-1 animate-spin">mdi-loading</v-icon>
                                     </div>
                                 </v-card-text>
                             </v-card>
@@ -45,10 +50,12 @@
                                 <span class="text-body-1 text-medium-emphasis">{{ tt('Manage your investment portfolio') }}</span>
                             </div>
                             <v-spacer />
-                            <v-btn class="me-4" :disabled="loading" color="secondary" variant="tonal"
+                            <v-btn class="me-4" :disabled="loading || isRefreshingPrices" 
+                                   color="secondary" variant="tonal"
                                    @click="refreshPrices">
-                                <v-icon :icon="mdiRefresh" class="me-2" />
-                                {{ tt('Refresh Prices') }}
+                                <v-icon :icon="mdiRefresh" class="me-2" 
+                                        :class="{ 'animate-spin': isRefreshingPrices }" />
+                                {{ isRefreshingPrices ? tt('Refreshing...') : tt('Refresh Prices') }}
                             </v-btn>
                             <v-btn :disabled="loading" color="primary" variant="elevated"
                                    @click="showAddInvestmentDialog = true">
@@ -160,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useDisplay } from 'vuetify';
 
 import {
@@ -196,6 +203,8 @@ const selectedInvestment = ref<typeof investments.value[0] | undefined>(undefine
 
 const investments = computed(() => investmentStore.allInvestments);
 const portfolioSummary = computed(() => investmentStore.portfolioSummary);
+const isRefreshingPrices = computed(() => investmentStore.isRefreshingPrices);
+const lastPriceRefresh = computed(() => investmentStore.lastPriceRefresh);
 
 // Table headers
 const headers = computed(() => [
@@ -224,14 +233,30 @@ const loadInvestments = async () => {
 
 
 const refreshPrices = async () => {
-    loading.value = true;
     try {
-        await investmentStore.refreshStockPrices();
+        await investmentStore.refreshStockPrices(true); // Force refresh
     } catch (error) {
         console.error('Failed to refresh prices:', error);
         // TODO: Show error notification to user
-    } finally {
-        loading.value = false;
+    }
+};
+
+const formatLastRefreshTime = (timestamp: number): string => {
+    if (timestamp === 0) return '';
+    
+    const now = Date.now();
+    const diff = now - timestamp;
+    
+    if (diff < 60000) { // Less than 1 minute
+        return tt('Just now');
+    } else if (diff < 3600000) { // Less than 1 hour
+        const minutes = Math.floor(diff / 60000);
+        return tt('{0} minutes ago', minutes);
+    } else if (diff < 86400000) { // Less than 1 day
+        const hours = Math.floor(diff / 3600000);
+        return tt('{0} hours ago', hours);
+    } else {
+        return new Date(timestamp).toLocaleString();
     }
 };
 
@@ -264,42 +289,27 @@ const onTransactionAdded = () => {
     // loadInvestments();
 };
 
-// Auto-refresh prices periodically
-let refreshInterval: NodeJS.Timeout | null = null;
-
-const startPriceRefresh = () => {
-    // Refresh prices every 5 minutes
-    refreshInterval = setInterval(async () => {
-        try {
-            await investmentStore.refreshStockPrices();
-        } catch (error) {
-            console.error('Auto refresh failed:', error);
-        }
-    }, 5 * 60 * 1000);
-};
-
-const stopPriceRefresh = () => {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-        refreshInterval = null;
-    }
-};
-
 // Lifecycle
 onMounted(async () => {
     await loadInvestments();
-    
-    // Start automatic price refresh after initial load
-    setTimeout(startPriceRefresh, 2000);
-});
-
-onUnmounted(() => {
-    stopPriceRefresh();
 });
 </script>
 
 <style scoped>
 .match-height {
     height: 100%;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>
