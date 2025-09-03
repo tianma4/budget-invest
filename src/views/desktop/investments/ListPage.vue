@@ -69,6 +69,7 @@
                                 :items="investments"
                                 :items-per-page="10"
                                 class="border"
+                                hide-default-footer
                             >
                                 <template #item.tickerSymbol="{ item }">
                                     <div class="d-flex align-center">

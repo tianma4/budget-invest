@@ -29,7 +29,6 @@ import SettingsPage from '@/views/mobile/SettingsPage.vue';
 import ApplicationLockPage from '@/views/mobile/ApplicationLockPage.vue';
 import ExchangeRatesListPage from '@/views/mobile/exchangerates/ListPage.vue';
 import ExchangeRatesUpdatePage from '@/views/mobile/exchangerates/UpdatePage.vue';
-import InvestmentListPage from '@/views/mobile/investments/ListPage.vue';
 import PlanningDashboardPage from '@/views/mobile/planning/DashboardPage.vue';
 import AboutPage from '@/views/mobile/AboutPage.vue';
 
