@@ -10,6 +10,7 @@ import { DISPLAY_HIDDEN_AMOUNT } from '@/consts/numeral.ts';
 
 import { isNumber } from '@/lib/common.ts';
 import { stockPriceService } from '@/services/stockPrice.ts';
+import { isUserUnlocked } from '@/lib/userstate.ts';
 
 export interface Investment {
     investmentId: string;
@@ -418,6 +419,12 @@ export const useInvestmentStore = defineStore('investments', () => {
                 return;
             }
 
+            // Check if user is authenticated and unlocked
+            if (!isUserUnlocked()) {
+                console.log('Skipping stock price refresh: User not authenticated or session locked');
+                return;
+            }
+
             // Prevent concurrent refreshes unless forced
             if (isRefreshingPrices.value && !force) {
                 return;
@@ -467,6 +474,8 @@ export const useInvestmentStore = defineStore('investments', () => {
                 
                 lastPriceRefresh.value = Date.now();
                 console.log(`Stock prices updated at ${new Date().toLocaleTimeString()}`);
+            } else if (stockPrices.size === 0) {
+                console.log('No stock prices received - this may be due to authentication issues or API unavailability');
             }
             
         } catch (error) {
@@ -526,6 +535,12 @@ export const useInvestmentStore = defineStore('investments', () => {
     function startPriceRefresh(): void {
         // Clear any existing interval
         stopPriceRefresh();
+        
+        // Check if user is authenticated before starting refresh
+        if (!isUserUnlocked()) {
+            console.log('Cannot start stock price refresh: User not authenticated or session locked');
+            return;
+        }
         
         // Start immediate refresh
         refreshStockPrices(true);

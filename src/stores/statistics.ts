@@ -175,7 +175,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
     const transactionCategoryTrendsData = ref<TransactionStatisticTrendsResponseItem[]>([]);
     const transactionStatisticsStateInvalid = ref<boolean>(true);
 
-    const categoricalAnalysisChartDataCategory = computed<string>(() => {
+    const categoricalAnalysisChartDataCategory = computed<'account' | 'category' | 'fixed'>(() => {
         if (transactionStatisticsFilter.value.chartDataType === ChartDataType.ExpenseByAccount.type ||
             transactionStatisticsFilter.value.chartDataType === ChartDataType.IncomeByAccount.type ||
             transactionStatisticsFilter.value.chartDataType === ChartDataType.AccountTotalAssets.type ||
@@ -187,7 +187,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
             transactionStatisticsFilter.value.chartDataType === ChartDataType.IncomeBySecondaryCategory.type) {
             return 'category';
         } else {
-            return '';
+            return 'fixed';
         }
     });
 

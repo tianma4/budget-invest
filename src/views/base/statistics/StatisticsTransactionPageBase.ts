@@ -61,7 +61,7 @@ export function useStatisticsTransactionPageBase() {
     const allDateAggregationTypes = computed<TypeAndDisplayName[]>(() => getAllStatisticsDateAggregationTypes());
 
     const query = computed<TransactionStatisticsFilter>(() => statisticsStore.transactionStatisticsFilter);
-    const queryChartDataCategory = computed<string>(() => statisticsStore.categoricalAnalysisChartDataCategory);
+    const queryChartDataCategory = computed<'account' | 'category' | 'fixed'>(() => statisticsStore.categoricalAnalysisChartDataCategory);
     const queryDateType = computed<number | null>(() => {
         if (analysisType.value === StatisticsAnalysisType.CategoricalAnalysis) {
             return query.value.categoricalChartDateType;

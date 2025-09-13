@@ -1,6 +1,8 @@
 // Stock Price Service for fetching real-time stock data
 // Using Yahoo Finance API as a free alternative
 
+import { getCurrentToken } from '@/lib/userstate.ts';
+
 export interface StockQuote {
   symbol: string;
   price: number;
@@ -30,12 +32,19 @@ class StockPriceService {
         return cached.data;
       }
 
+      // Check if user is authenticated and unlocked
+      const token = this.getAuthToken();
+      if (!token) {
+        console.warn(`Cannot fetch stock price for ${symbol}: User not authenticated or session locked`);
+        return null;
+      }
+
       // Use backend proxy endpoint instead of direct API calls
       const response = await fetch('/api/v1/stock_prices/quote.json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           symbol: symbol.toUpperCase()
@@ -43,7 +52,11 @@ class StockPriceService {
       });
       
       if (!response.ok) {
-        console.warn(`Backend stock price API failed for ${symbol}: ${response.status}`);
+        if (response.status === 401 || response.status === 403) {
+          console.warn(`Stock price API authentication failed for ${symbol}: User session may be expired`);
+        } else {
+          console.warn(`Backend stock price API failed for ${symbol}: ${response.status}`);
+        }
         return null;
       }
 
@@ -76,15 +89,26 @@ class StockPriceService {
   }
 
   private getAuthToken(): string {
-    // Get token from localStorage or store
-    const token = localStorage.getItem('ezbookkeeping_token') || '';
-    return token;
+    // Use the same token retrieval method as the main app
+    return getCurrentToken() || '';
   }
 
   async getMultipleStockPrices(symbols: string[]): Promise<Map<string, StockQuote>> {
     const results = new Map<string, StockQuote>();
     
     try {
+      // Check if user is authenticated and unlocked
+      const token = this.getAuthToken();
+      if (!token) {
+        console.warn(`Cannot fetch stock prices: User not authenticated or session locked`);
+        return results;
+      }
+
+      // For now, use individual requests instead of bulk API to avoid validation issues
+      console.log('🚀 Volume mounts working! Using individual requests for stock prices (bulk API has validation issues)');
+      return await this.fallbackToIndividualRequests(symbols);
+
+      /* Bulk API code - temporarily disabled due to backend validation issues
       // Use backend bulk endpoint for efficiency
       const symbolsString = symbols.map(s => s.toUpperCase()).join(',');
       
@@ -92,17 +116,23 @@ class StockPriceService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
+          symbol: symbols[0], // Required field for validation
           symbols: symbolsString
         })
       });
       
       if (!response.ok) {
-        console.warn(`Backend bulk stock price API failed: ${response.status}`);
-        // Fallback to individual requests
-        return await this.fallbackToIndividualRequests(symbols);
+        if (response.status === 401 || response.status === 403) {
+          console.warn(`Bulk stock price API authentication failed: User session may be expired`);
+          return results;
+        } else {
+          console.warn(`Backend bulk stock price API failed: ${response.status}`);
+          // Fallback to individual requests
+          return await this.fallbackToIndividualRequests(symbols);
+        }
       }
 
       const data = await response.json();
@@ -124,9 +154,10 @@ class StockPriceService {
           });
         }
       });
+      */
 
     } catch (error) {
-      console.error('Error fetching bulk stock prices:', error);
+      console.error('Error fetching stock prices:', error);
       return await this.fallbackToIndividualRequests(symbols);
     }
 

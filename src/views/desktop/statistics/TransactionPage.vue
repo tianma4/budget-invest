@@ -363,7 +363,7 @@ import TransactionTagFilterSettingsCard from '@/views/desktop/common/cards/Trans
 import ExportDialog from '@/views/desktop/statistics/transaction/dialogs/ExportDialog.vue';
 import BtnVerticalGroup from '@/components/desktop/BtnVerticalGroup.vue';
 import PieChart from '@/components/desktop/PieChart.vue';
-import ItemIcon from '@/components/common/ItemIcon.vue';
+import ItemIcon from '@/components/desktop/ItemIcon.vue';
 
 import { ref, computed, useTemplateRef, watch } from 'vue';
 import { useRouter, onBeforeRouteUpdate } from 'vue-router';
