@@ -211,15 +211,7 @@
                                                                     variant="outlined"
                                                                     :prepend-icon="getCreditCardDueInfo(element)?.isOverdue ? mdiAlertCircleOutline : mdiCalendarClockOutline"
                                                                 >
-                                                                    <template v-if="getCreditCardDueInfo(element)?.isOverdue">
-                                                                        {{ tt('Payment overdue by {{days}} days', { days: getCreditCardDueInfo(element)?.daysUntilDue || 0 }) }}
-                                                                    </template>
-                                                                    <template v-else-if="getCreditCardDueInfo(element)?.daysUntilDue === 0">
-                                                                        {{ tt('Payment due today') }}
-                                                                    </template>
-                                                                    <template v-else>
-                                                                        {{ tt('Payment due in {{days}} days', { days: getCreditCardDueInfo(element)?.daysUntilDue || 0 }) }}
-                                                                    </template>
+                                                                    {{ getCreditCardDueText(element) }}
                                                                 </v-chip>
                                                             </v-card-text>
 
@@ -475,6 +467,19 @@ function accountReconciliationStatementDateRanges(account: Account): LocalizedDa
 
 function getCreditCardDueInfo(account: Account): { dueDate: Date; daysUntilDue: number; isOverdue: boolean } | null {
     return accountsStore.getCreditCardPaymentDueDate(account);
+}
+
+function getCreditCardDueText(account: Account): string {
+    const dueInfo = getCreditCardDueInfo(account);
+    if (!dueInfo) return '';
+    
+    if (dueInfo.isOverdue) {
+        return tt('Payment overdue by {0} days', [dueInfo.daysUntilDue.toString()]);
+    } else if (dueInfo.daysUntilDue === 0) {
+        return tt('Payment due today');
+    } else {
+        return tt('Payment due in {0} days', [dueInfo.daysUntilDue.toString()]);
+    }
 }
 
 function add(): void {
