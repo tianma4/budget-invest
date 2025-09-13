@@ -110,6 +110,16 @@
                             <div class="nested-list-item-title">
                                 <span>{{ account.name }}</span>
                                 <div class="item-footer" v-if="account.comment">{{ account.comment }}</div>
+                                <div class="item-footer" v-if="getCreditCardDueInfo(account)">
+                                    <f7-chip 
+                                        :color="getCreditCardDueInfo(account)?.isOverdue ? 'red' : (getCreditCardDueInfo(account)?.daysUntilDue || 0) <= 3 ? 'orange' : 'blue'"
+                                        :text="getCreditCardDueInfo(account)?.isOverdue 
+                                            ? tt('Payment overdue by {{days}} days', { days: getCreditCardDueInfo(account)?.daysUntilDue || 0 })
+                                            : getCreditCardDueInfo(account)?.daysUntilDue === 0
+                                            ? tt('Payment due today')
+                                            : tt('Payment due in {{days}} days', { days: getCreditCardDueInfo(account)?.daysUntilDue || 0 })"
+                                    ></f7-chip>
+                                </div>
                             </div>
                             <div class="nested-list-item-after" v-if="account.type === AccountType.MultiSubAccounts.type">
                                 <span>{{ accountBalance(account) }}</span>
@@ -267,6 +277,10 @@ function hasAccount(accountCategory: AccountCategory, visibleOnly: boolean): boo
 
 function hasVisibleSubAccount(account: Account): boolean {
     return accountsStore.hasVisibleSubAccount(showHidden.value, account);
+}
+
+function getCreditCardDueInfo(account: Account): { dueDate: Date; daysUntilDue: number; isOverdue: boolean } | null {
+    return accountsStore.getCreditCardPaymentDueDate(account);
 }
 
 function getAccountDomId(account: Account): string {

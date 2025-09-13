@@ -204,6 +204,25 @@
                                                                 {{ element.getAccountOrSubAccountComment(activeSubAccount[element.id]) }}
                                                             </v-card-text>
 
+                                                            <v-card-text v-if="getCreditCardDueInfo(element)" class="pt-0">
+                                                                <v-chip 
+                                                                    :color="getCreditCardDueInfo(element)?.isOverdue ? 'error' : getCreditCardDueInfo(element)?.daysUntilDue <= 3 ? 'warning' : 'info'"
+                                                                    size="small"
+                                                                    variant="outlined"
+                                                                    :prepend-icon="getCreditCardDueInfo(element)?.isOverdue ? mdiAlertCircleOutline : mdiCalendarClockOutline"
+                                                                >
+                                                                    <template v-if="getCreditCardDueInfo(element)?.isOverdue">
+                                                                        {{ tt('Payment overdue by {{days}} days', { days: getCreditCardDueInfo(element)?.daysUntilDue || 0 }) }}
+                                                                    </template>
+                                                                    <template v-else-if="getCreditCardDueInfo(element)?.daysUntilDue === 0">
+                                                                        {{ tt('Payment due today') }}
+                                                                    </template>
+                                                                    <template v-else>
+                                                                        {{ tt('Payment due in {{days}} days', { days: getCreditCardDueInfo(element)?.daysUntilDue || 0 }) }}
+                                                                    </template>
+                                                                </v-chip>
+                                                            </v-card-text>
+
                                                             <v-card-text>
                                                                 <div class="d-flex account-toolbar align-center">
                                                                     <v-btn class="px-2" density="comfortable" color="default" variant="text"
@@ -326,7 +345,9 @@ import {
     mdiListBoxOutline,
     mdiInvoiceListOutline,
     mdiDrag,
-    mdiDotsVertical
+    mdiDotsVertical,
+    mdiAlertCircleOutline,
+    mdiCalendarClockOutline
 } from '@mdi/js';
 
 type ConfirmDialogType = InstanceType<typeof ConfirmDialog>;
@@ -450,6 +471,10 @@ function accountCurrency(account: Account): string | null {
 
 function accountReconciliationStatementDateRanges(account: Account): LocalizedDateRange[] {
     return getAllDateRanges(DateRangeScene.Normal, true, !!accountsStore.getAccountStatementDate(account.id));
+}
+
+function getCreditCardDueInfo(account: Account): { dueDate: Date; daysUntilDue: number; isOverdue: boolean } | null {
+    return accountsStore.getCreditCardPaymentDueDate(account);
 }
 
 function add(): void {

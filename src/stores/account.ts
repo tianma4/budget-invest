@@ -490,6 +490,56 @@ export const useAccountsStore = defineStore('accounts', () => {
         return null;
     }
 
+    function getCreditCardPaymentDueDate(account: Account): { dueDate: Date; daysUntilDue: number; isOverdue: boolean } | null {
+        if (!account || account.category !== AccountCategory.CreditCard.type || !account.creditCardStatementDate) {
+            return null;
+        }
+
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        const statementDay = account.creditCardStatementDate;
+
+        // Calculate the next payment due date (typically 20-25 days after statement date)
+        // Using 23 days as a reasonable default grace period
+        const gracePeriodDays = 23;
+        
+        let dueDate = new Date(currentYear, currentMonth, statementDay + gracePeriodDays);
+        
+        // If the statement date has passed this month, calculate for next month
+        if (today.getDate() > statementDay) {
+            dueDate = new Date(currentYear, currentMonth + 1, statementDay + gracePeriodDays);
+        }
+        
+        // Handle month overflow (e.g., if statement day + grace period > days in month)
+        if (dueDate.getMonth() !== (currentMonth + (today.getDate() > statementDay ? 1 : 0)) % 12) {
+            // Reset to the first day of the next month if we overflowed
+            const targetMonth = currentMonth + (today.getDate() > statementDay ? 2 : 1);
+            dueDate = new Date(currentYear, targetMonth, Math.min(statementDay + gracePeriodDays, 28));
+        }
+
+        const timeDiff = dueDate.getTime() - today.getTime();
+        const daysUntilDue = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        const isOverdue = daysUntilDue < 0;
+
+        return {
+            dueDate,
+            daysUntilDue: Math.abs(daysUntilDue),
+            isOverdue
+        };
+    }
+
+    function getCreditCardAccountsWithUpcomingDueDates(dayThreshold: number = 7): Account[] {
+        return allAccounts.value.filter(account => {
+            if (account.category !== AccountCategory.CreditCard.type || account.hidden) {
+                return false;
+            }
+
+            const dueInfo = getCreditCardPaymentDueDate(account);
+            return dueInfo && (dueInfo.isOverdue || dueInfo.daysUntilDue <= dayThreshold);
+        });
+    }
+
     function getNetAssets(showAccountBalance: boolean): number | HiddenAmount | NumberWithSuffix {
         if (!showAccountBalance) {
             return DISPLAY_HIDDEN_AMOUNT;
@@ -1137,6 +1187,8 @@ export const useAccountsStore = defineStore('accounts', () => {
         getFirstShowingIds,
         getLastShowingIds,
         getAccountStatementDate,
+        getCreditCardPaymentDueDate,
+        getCreditCardAccountsWithUpcomingDueDates,
         getNetAssets,
         getTotalAssets,
         getTotalLiabilities,

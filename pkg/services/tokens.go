@@ -378,6 +378,38 @@ func (s *TokenService) createToken(c core.Context, user *models.User, tokenType 
 	var err error
 	now := time.Now()
 
+	// Enforce device limit for normal tokens (login sessions) - max 4 devices
+	if tokenType == core.USER_TOKEN_TYPE_NORMAL {
+		existingTokens, err := s.GetAllUnexpiredNormalAndMCPTokensByUid(c, user.Uid)
+		if err != nil {
+			return "", nil, nil, err
+		}
+
+		// Count normal tokens (exclude MCP tokens)
+		normalTokenCount := 0
+		var oldestToken *models.TokenRecord
+		for _, token := range existingTokens {
+			if token.TokenType == core.USER_TOKEN_TYPE_NORMAL {
+				normalTokenCount++
+				if oldestToken == nil || token.CreatedUnixTime < oldestToken.CreatedUnixTime {
+					oldestToken = token
+				}
+			}
+		}
+
+		// If we have 4 or more normal tokens, remove the oldest one
+		if normalTokenCount >= 4 {
+			if oldestToken != nil {
+				err = s.DeleteToken(c, oldestToken)
+				if err != nil {
+					log.Warnf(c, "[tokens.createToken] failed to remove oldest token for user \"uid:%d\" to enforce device limit, because %s", user.Uid, err.Error())
+				} else {
+					log.Infof(c, "[tokens.createToken] removed oldest token \"utid:%d\" for user \"uid:%d\" to enforce 4-device limit", oldestToken.UserTokenId, user.Uid)
+				}
+			}
+		}
+	}
+
 	tokenRecord := &models.TokenRecord{
 		Uid:              user.Uid,
 		UserTokenId:      s.getUserTokenId(),
