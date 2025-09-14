@@ -30,3 +30,5 @@ interface Credential {
         userHandle: ArrayBuffer;
     };
 }
+
+declare module 'vue-echarts';

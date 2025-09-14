@@ -205,11 +205,11 @@
                                                             </v-card-text>
 
                                                             <v-card-text v-if="getCreditCardDueInfo(element)" class="pt-0">
-                                                                <v-chip 
-                                                                    :color="getCreditCardDueInfo(element)?.isOverdue ? 'error' : getCreditCardDueInfo(element)?.daysUntilDue <= 3 ? 'warning' : 'info'"
+                                                                <v-chip
+                                                                    :color="getCreditCardDueInfo(element)!.isOverdue ? 'error' : getCreditCardDueInfo(element)!.daysUntilDue <= 3 ? 'warning' : 'info'"
                                                                     size="small"
                                                                     variant="outlined"
-                                                                    :prepend-icon="getCreditCardDueInfo(element)?.isOverdue ? mdiAlertCircleOutline : mdiCalendarClockOutline"
+                                                                    :prepend-icon="getCreditCardDueInfo(element)!.isOverdue ? mdiAlertCircleOutline : mdiCalendarClockOutline"
                                                                 >
                                                                     {{ getCreditCardDueText(element) }}
                                                                 </v-chip>
