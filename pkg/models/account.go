@@ -70,7 +70,7 @@ var defaultCreditCardAccountStatementDate = 0
 type Account struct {
 	AccountId       int64           `xorm:"PK"`
 	Uid             int64           `xorm:"INDEX(IDX_account_uid_deleted_parent_account_id_order) NOT NULL"`
-	OrganizationId  int64           `xorm:"INDEX(IDX_account_org_deleted_parent_account_id_order) NOT NULL"`
+	OrganizationId  int64           `xorm:"INDEX(IDX_account_org_deleted_parent_account_id_order) DEFAULT 0"`
 	Deleted         bool            `xorm:"INDEX(IDX_account_uid_deleted_parent_account_id_order) INDEX(IDX_account_org_deleted_parent_account_id_order) NOT NULL"`
 	Category        AccountCategory `xorm:"NOT NULL"`
 	Type            AccountType     `xorm:"NOT NULL"`
