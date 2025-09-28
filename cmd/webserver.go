@@ -331,6 +331,15 @@ func startWebServer(c *core.CliContext) error {
 				apiV1Route.GET("/data/export.tsv", bindTsv(api.DataManagements.ExportDataToEzbookkeepingTSVHandler))
 			}
 
+			// Organizations
+			apiV1Route.GET("/organizations/list.json", bindApi(api.Organizations.OrganizationListHandler))
+			apiV1Route.GET("/organizations/get.json", bindApi(api.Organizations.OrganizationGetHandler))
+			apiV1Route.POST("/organizations/add.json", bindApi(api.Organizations.OrganizationCreateHandler))
+			apiV1Route.POST("/organizations/invite.json", bindApi(api.Organizations.OrganizationInviteHandler))
+			apiV1Route.POST("/organizations/accept_invite.json", bindApi(api.Organizations.OrganizationAcceptInviteHandler))
+			apiV1Route.POST("/organizations/update_member_role.json", bindApi(api.Organizations.OrganizationMemberRoleUpdateHandler))
+			apiV1Route.POST("/organizations/remove_member.json", bindApi(api.Organizations.OrganizationMemberRemoveHandler))
+
 			// Accounts
 			apiV1Route.GET("/accounts/list.json", bindApi(api.Accounts.AccountListHandler))
 			apiV1Route.GET("/accounts/get.json", bindApi(api.Accounts.AccountGetHandler))
