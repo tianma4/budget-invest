@@ -13,6 +13,10 @@
                 <v-icon size="20" start :icon="mdiOnepassword"/>
                 {{ tt('Two-Factor Authentication') }}
             </v-tab>
+            <v-tab value="organizationSetting" @click="pushRouter('organizationSetting')">
+                <v-icon size="20" start :icon="mdiDomain"/>
+                {{ tt('Organizations') }}
+            </v-tab>
             <v-tab value="dataManagementSetting" @click="pushRouter('dataManagementSetting')">
                 <v-icon size="20" start :icon="mdiDatabaseCogOutline"/>
                 {{ tt('Data Management') }}
@@ -32,6 +36,10 @@
                 <user-two-factor-auth-setting-tab ref="twoFactorSettingTab"/>
             </v-window-item>
 
+            <v-window-item value="organizationSetting">
+                <user-organization-setting-tab/>
+            </v-window-item>
+
             <v-window-item value="dataManagementSetting">
                 <user-data-management-setting-tab/>
             </v-window-item>
@@ -43,6 +51,7 @@
 import UserBasicSettingTab from './settings/tabs/UserBasicSettingTab.vue';
 import UserSecuritySettingTab from './settings/tabs/UserSecuritySettingTab.vue';
 import UserTwoFactorAuthSettingTab from './settings/tabs/UserTwoFactorAuthSettingTab.vue';
+import UserOrganizationSettingTab from './settings/tabs/UserOrganizationSettingTab.vue';
 import UserDataManagementSettingTab from './settings/tabs/UserDataManagementSettingTab.vue';
 
 import { ref, useTemplateRef, watch } from 'vue';
@@ -54,6 +63,7 @@ import {
     mdiAccountOutline,
     mdiLockOpenOutline,
     mdiOnepassword,
+    mdiDomain,
     mdiDatabaseCogOutline
 } from '@mdi/js';
 
@@ -71,6 +81,7 @@ const ALL_TABS: string[] = [
     'basicSetting',
     'securitySetting',
     'twoFactorSetting',
+    'organizationSetting',
     'dataManagementSetting'
 ];
 

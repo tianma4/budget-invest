@@ -33,6 +33,7 @@ import PlanningDashboardPage from '@/views/mobile/planning/DashboardPage.vue';
 import AboutPage from '@/views/mobile/AboutPage.vue';
 
 import UserProfilePage from '@/views/mobile/users/UserProfilePage.vue';
+import OrganizationsPage from '@/views/mobile/OrganizationsPage.vue';
 import DataManagementPage from '@/views/mobile/users/DataManagementPage.vue';
 import TwoFactorAuthPage from '@/views/mobile/users/TwoFactorAuthPage.vue';
 import SessionListPage from '@/views/mobile/users/SessionListPage.vue';
@@ -271,6 +272,11 @@ const routes: Router.RouteParameters[] = [
     {
         path: '/user/profile',
         async: asyncResolve(UserProfilePage),
+        beforeEnter: [checkLogin]
+    },
+    {
+        path: '/user/organizations',
+        async: asyncResolve(OrganizationsPage),
         beforeEnter: [checkLogin]
     },
     {
