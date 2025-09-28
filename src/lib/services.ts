@@ -53,6 +53,15 @@ import type {
     ForgetPasswordRequest
 } from '@/models/forget_password.ts';
 import type {
+    OrganizationBasicInfo,
+    OrganizationCreateRequest,
+    OrganizationUpdateRequest,
+    OrganizationInviteRequest,
+    OrganizationAcceptInviteRequest,
+    OrganizationMemberRoleUpdateRequest,
+    OrganizationMemberRemoveRequest
+} from '@/models/organization.ts';
+import type {
     ImportTransactionResponsePageWrapper
 } from '@/models/imported_transaction.ts';
 import type {
@@ -383,6 +392,30 @@ export default {
     },
     clearAllTransactions: (req: ClearDataRequest): ApiResponsePromise<boolean> => {
         return axios.post<ApiResponse<boolean>>('v1/data/clear/transactions.json', req);
+    },
+    getOrganizations: (): ApiResponsePromise<OrganizationBasicInfo[]> => {
+        return axios.get<ApiResponse<OrganizationBasicInfo[]>>('v1/organizations/list.json');
+    },
+    getOrganization: ({ organizationId }: { organizationId: string }): ApiResponsePromise<OrganizationBasicInfo> => {
+        return axios.get<ApiResponse<OrganizationBasicInfo>>('v1/organizations/get.json?organizationId=' + organizationId);
+    },
+    createOrganization: (req: OrganizationCreateRequest): ApiResponsePromise<OrganizationBasicInfo> => {
+        return axios.post<ApiResponse<OrganizationBasicInfo>>('v1/organizations/add.json', req);
+    },
+    updateOrganization: (req: OrganizationUpdateRequest): ApiResponsePromise<OrganizationBasicInfo> => {
+        return axios.post<ApiResponse<OrganizationBasicInfo>>('v1/organizations/modify.json', req);
+    },
+    inviteToOrganization: (req: OrganizationInviteRequest): ApiResponsePromise<boolean> => {
+        return axios.post<ApiResponse<boolean>>('v1/organizations/invite.json', req);
+    },
+    acceptOrganizationInvite: (req: OrganizationAcceptInviteRequest): ApiResponsePromise<boolean> => {
+        return axios.post<ApiResponse<boolean>>('v1/organizations/accept_invite.json', req);
+    },
+    updateOrganizationMemberRole: (req: OrganizationMemberRoleUpdateRequest): ApiResponsePromise<boolean> => {
+        return axios.post<ApiResponse<boolean>>('v1/organizations/update_member_role.json', req);
+    },
+    removeOrganizationMember: (req: OrganizationMemberRemoveRequest): ApiResponsePromise<boolean> => {
+        return axios.post<ApiResponse<boolean>>('v1/organizations/remove_member.json', req);
     },
     getAllAccounts: ({ visibleOnly }: { visibleOnly: boolean }): ApiResponsePromise<AccountInfoResponse[]> => {
         return axios.get<ApiResponse<AccountInfoResponse[]>>('v1/accounts/list.json?visible_only=' + visibleOnly);

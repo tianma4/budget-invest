@@ -124,6 +124,17 @@ func (c *WebContext) GetCurrentUid() int64 {
 	return claims.Uid
 }
 
+// GetCurrentOrganizationId returns the current organization id by the current user token
+func (c *WebContext) GetCurrentOrganizationId() int64 {
+	claims := c.GetTokenClaims()
+
+	if claims == nil {
+		return 0
+	}
+
+	return claims.OrganizationId
+}
+
 // GetTokenStringFromHeader returns the token string from the request header
 func (c *WebContext) GetTokenStringFromHeader() string {
 	tokenHeader := c.GetHeader(tokenHeaderName)

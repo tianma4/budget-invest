@@ -20,12 +20,13 @@ const (
 
 // UserTokenClaims represents user token
 type UserTokenClaims struct {
-	UserTokenId string    `json:"userTokenId"`
-	Uid         int64     `json:"jti,string"`
-	Username    string    `json:"username,omitempty"`
-	Type        TokenType `json:"type"`
-	IssuedAt    int64     `json:"iat"`
-	ExpiresAt   int64     `json:"exp"`
+	UserTokenId    string    `json:"userTokenId"`
+	Uid            int64     `json:"jti,string"`
+	Username       string    `json:"username,omitempty"`
+	OrganizationId int64     `json:"organizationId,string,omitempty"`
+	Type           TokenType `json:"type"`
+	IssuedAt       int64     `json:"iat"`
+	ExpiresAt      int64     `json:"exp"`
 }
 
 // GetExpirationTime returns the expiration time of this token

@@ -16,4 +16,5 @@ const (
 	UUID_TYPE_PICTURE               UuidType = 8
 	UUID_TYPE_INVESTMENT            UuidType = 9
 	UUID_TYPE_INVESTMENT_TRANSACTION UuidType = 10
+	UUID_TYPE_ORGANIZATION          UuidType = 11
 )

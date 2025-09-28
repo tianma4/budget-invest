@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Budget Invest</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <div id="app">
+        <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+            <h1>Budget Invest</h1>
+            <p>Loading application...</p>
+            <p><a href="/api/v1/accounts/list.json" style="color: #007bff;">Test API Connection</a></p>
+            <p>Backend running on port 8081 with investment features</p>
+        </div>
+    </div>
+    <script>
+        // Check if API is available
+        fetch('/api/v1/accounts/list.json')
+        .then(response => {
+            if (response.status === 400 || response.status === 401) {
+                // Authentication required - redirect to register/login
+                window.location.href = 'http://localhost:8081/#/login';
+            }
+        })
+        .catch(() => {
+            document.getElementById('app').innerHTML = '<div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;"><h1>Backend Not Running</h1><p>Please start the backend server with: ./ezbookkeeping server run</p></div>';
+        });
+    </script>
+</body>
+</html>

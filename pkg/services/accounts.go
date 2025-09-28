@@ -57,6 +57,32 @@ func (s *AccountService) GetAllAccountsByUid(c core.Context, uid int64) ([]*mode
 	return accounts, err
 }
 
+// GetAllAccountsByOrganizationId returns all account models of organization
+func (s *AccountService) GetAllAccountsByOrganizationId(c core.Context, uid int64, organizationId int64) ([]*models.Account, error) {
+	if uid <= 0 {
+		return nil, errs.ErrUserIdInvalid
+	}
+
+	if organizationId <= 0 {
+		return nil, errs.ErrOrganizationIdInvalid
+	}
+
+	// Check if user has access to the organization
+	userRole, err := Organizations.GetUserOrganizationRole(c, uid, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !userRole.CanViewAccounts() {
+		return nil, errs.ErrNoPermission
+	}
+
+	var accounts []*models.Account
+	err = s.UserDataDB(uid).NewSession(c).Where("organization_id=? AND deleted=?", organizationId, false).OrderBy("parent_account_id asc, display_order asc").Find(&accounts)
+
+	return accounts, err
+}
+
 // GetAccountByAccountId returns account model according to account id
 func (s *AccountService) GetAccountByAccountId(c core.Context, uid int64, accountId int64) (*models.Account, error) {
 	if uid <= 0 {
