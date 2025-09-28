@@ -28,7 +28,7 @@
                 :subtitle="`${tt('Role')}: ${getOrganizationRoleName(org.userRole)}`"
                 :after="org.organizationId === currentOrganization?.organizationId ? tt('Current') : ''"
                 link="#"
-                @click="() => switchToOrganization(Organization.of(org as any))"
+                @click="() => switchToOrganization(convertToBasicInfo(org as Organization))"
                 :class="{ 'disabled': org.organizationId === currentOrganization?.organizationId }"
             >
                 <template #media>
@@ -288,6 +288,28 @@ const isOwner = computed(() => currentOrganization.value?.userRole === 1);
 const canManageMembers = computed(() => currentOrganization.value?.userRole && currentOrganization.value.userRole <= 2);
 const canInviteMembers = computed(() => currentOrganization.value?.userRole && currentOrganization.value.userRole <= 2);
 
+const convertToBasicInfo = (org: Organization): OrganizationBasicInfo => {
+    const getRoleName = (role: OrganizationRole): string => {
+        switch (role) {
+            case 1: return 'Owner';
+            case 2: return 'Admin';
+            case 3: return 'Member';
+            case 4: return 'Viewer';
+            default: return 'Viewer';
+        }
+    };
+
+    return {
+        organizationId: org.organizationId,
+        name: org.name,
+        description: org.description,
+        defaultCurrency: org.defaultCurrency,
+        ownerUid: org.ownerUid,
+        userRole: getRoleName(org.userRole),
+        memberCount: org.memberCount
+    };
+};
+
 const availableRoles = computed(() => {
     const currentRole = currentOrganization.value?.userRole || 4;
     const roles = [];
@@ -406,7 +428,7 @@ const switchToOrganization = async (organization: OrganizationBasicInfo) => {
     }
 
     try {
-        await organizationStore.setCurrentOrganization(organization);
+        await organizationStore.setCurrentOrganization(Organization.of(organization as any));
         f7.toast.create({
             text: tt('Switched to organization: {name}', { name: organization.name }),
             position: 'center',
