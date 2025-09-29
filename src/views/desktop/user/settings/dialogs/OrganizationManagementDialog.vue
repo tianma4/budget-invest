@@ -154,7 +154,7 @@ import {
 
 const props = defineProps<{
     modelValue: boolean;
-    organization: Organization;
+    organization: Organization | null;
 }>();
 
 const emit = defineEmits<{

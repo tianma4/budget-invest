@@ -228,7 +228,7 @@ const rules = {
 };
 
 const organizations = computed(() => organizationStore.organizations);
-const currentOrganization = computed(() => organizationStore.currentOrganization);
+const currentOrganization = computed(() => organizationStore.currentOrganization as Organization | null);
 
 const getOrganizationRoleName = (role: OrganizationRole): string => {
     switch (role) {

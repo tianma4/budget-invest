@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { Organization } from '@/models/organization.ts';
-import type { OrganizationBasicInfo, OrganizationCreateRequest, OrganizationInviteRequest, OrganizationAcceptInviteRequest } from '@/models/organization.ts';
+import type { OrganizationBasicInfo, OrganizationCreateRequest, OrganizationInviteRequest, OrganizationAcceptInviteRequest, OrganizationMember } from '@/models/organization.ts';
 import services from '@/lib/services.ts';
 
 export interface OrganizationState {
@@ -178,7 +178,7 @@ export const useOrganizationStore = defineStore('organization', {
             return this.inviteUserToOrganization(invite);
         },
 
-        async getOrganizationMembers(organizationId: string): Promise<any[]> {
+        async getOrganizationMembers(organizationId: string): Promise<OrganizationMember[]> {
             this.loading = true;
             this.error = null;
 
