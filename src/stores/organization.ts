@@ -174,6 +174,56 @@ export const useOrganizationStore = defineStore('organization', {
             }
         },
 
+        async inviteToOrganization(invite: OrganizationInviteRequest): Promise<boolean> {
+            return this.inviteUserToOrganization(invite);
+        },
+
+        async getOrganizationMembers(organizationId: string): Promise<any[]> {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await services.getOrganization({ organizationId });
+                const data = response.data;
+
+                if (!data || !data.success || !data.result) {
+                    this.error = 'Failed to load organization details';
+                    return [];
+                }
+
+                // For now, return empty array as member details would require a separate API
+                // This is a placeholder implementation
+                return [];
+            } catch (error) {
+                this.error = error instanceof Error ? error.message : 'Unknown error occurred';
+                return [];
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async removeOrganizationMember(request: { organizationId: string; uid: string }): Promise<boolean> {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await services.removeOrganizationMember(request);
+                const data = response.data;
+
+                if (!data || !data.success) {
+                    this.error = 'Failed to remove organization member';
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                this.error = error instanceof Error ? error.message : 'Unknown error occurred';
+                return false;
+            } finally {
+                this.loading = false;
+            }
+        },
+
         clearError(): void {
             this.error = null;
         },
