@@ -244,7 +244,7 @@ const loadOrganizations = async () => {
     loading.value = true;
     try {
         await organizationStore.loadOrganizations();
-    } catch (error) {
+    } catch {
         snackbar.value?.showError('Failed to load organizations');
     } finally {
         loading.value = false;
@@ -274,7 +274,7 @@ const createOrganization = async () => {
 
         snackbar.value?.showMessage('Organization created successfully');
         await loadOrganizations();
-    } catch (error) {
+    } catch {
         snackbar.value?.showError('Failed to create organization');
     } finally {
         creating.value = false;
@@ -296,7 +296,7 @@ const joinOrganization = async () => {
 
         snackbar.value?.showMessage('Successfully joined organization');
         await loadOrganizations();
-    } catch (error) {
+    } catch {
         snackbar.value?.showError('Failed to join organization');
     } finally {
         joining.value = false;
@@ -307,7 +307,7 @@ const switchToOrganization = async (organization: OrganizationBasicInfo) => {
     try {
         organizationStore.setCurrentOrganization(Organization.of(organization));
         snackbar.value?.showMessage('Switched to organization: {name}', { name: organization.name });
-    } catch (error) {
+    } catch {
         snackbar.value?.showError('Failed to switch organization');
     }
 };

@@ -197,3 +197,57 @@
 2025-09-29 07:33:52 [INFO] [webserver.startWebServer] will run at http://0.0.0.0:8080
 2025-09-29 07:34:05 [WARNING] [8bf83496-3536-ca87-0000-0007a2ca6717] [authorization.getTokenClaims] failed to parse token, because token is empty
 2025-09-29 07:34:05 [REQUEST] [8bf83496-3536-ca87-0000-0007a2ca6717] 400 202012 - ::1 GET /api/v1/accounts/list.json 0ms
+2025-09-29 07:34:52 [WARNING] [8bf83496-354e-4a87-0000-000ba2ca6717] [authorization.getTokenClaims] failed to parse token, because token is empty
+2025-09-29 07:34:52 [REQUEST] [8bf83496-354e-4a87-0000-000ba2ca6717] 400 202012 - ::1 GET /api/v1/accounts/list.json 0ms
+2025-09-29 07:37:52 [WARNING] [8bf83496-35a8-4c12-0000-000fa2ca6717] [authorization.getTokenClaims] failed to parse token, because token is empty
+2025-09-29 07:37:52 [REQUEST] [8bf83496-35a8-4c12-0000-000fa2ca6717] 400 202012 - ::1 GET /api/v1/organizations/list.json 1ms
+2025-09-29 07:39:29 [WARNING] [8bf83496-35d8-cc63-0000-0013a2ca6717] [authorization.getTokenClaims] failed to parse token, because token is empty
+2025-09-29 07:39:29 [REQUEST] [8bf83496-35d8-cc63-0000-0013a2ca6717] 400 202012 - ::1 GET /api/v1/accounts/list.json 0ms
+2025-09-29 07:44:59 [INFO] [cron-job-createscheduledtransaction-1759103099] [cron_job.doRun] run job "CreateScheduledTransaction" successfully, cost 2ms
+2025-09-29 07:48:45 [INFO] [8bf83496-36ee-cd2e-0000-00167f000001] [authorizations.AuthorizeHandler] user "uid:3772743332862623744" has logined, token type is 1, token will be expired at 1761695325
+2025-09-29 07:48:45 [REQUEST] [8bf83496-36ee-cd2e-0000-00167f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/authorize.json 12ms
+2025-09-29 07:48:45 [REQUEST] [8bf83496-36ee-cd36-0000-001e7f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/accounts/list.json?visible_only=false 0ms
+2025-09-29 07:48:45 [REQUEST] [8bf83496-36ee-cd35-0000-00227f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/transactions/amounts.json?use_transaction_timezone=false&query=today_1759075200_1759161599|thisWeek_1758988800_1759593599|thisMonth_1756656000_1759247999|thisYear_1735660800_1767196799|lastMonth_1753977600_1756655999|monthBeforeLastMonth_1751299200_1753977599|monthBeforeLast2Months_1748707200_1751299199|monthBeforeLast3Months_1746028800_1748707199|monthBeforeLast4Months_1743436800_1746028799|monthBeforeLast5Months_1740758400_1743436799|monthBeforeLast6Months_1738339200_1740758399|monthBeforeLast7Months_1735660800_1738339199|monthBeforeLast8Months_1732982400_1735660799|monthBeforeLast9Months_1730390400_1732982399|monthBeforeLast10Months_1727712000_1730390399 3ms
+2025-09-29 07:48:46 [REQUEST] [8bf83496-36ee-cd2e-0000-001a7f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/exchange_rates/latest.json 1091ms
+2025-09-29 07:56:23 [WARNING] [8bf83496-37d3-cf91-0000-0027a2ca6717] [authorization.getTokenClaims] failed to parse token, because token is empty
+2025-09-29 07:56:23 [REQUEST] [8bf83496-37d3-cf91-0000-0027a2ca6717] 400 202012 - ::1 GET /api/v1/accounts/list.json 0ms
+2025-09-29 07:56:29 [INFO] [8bf83496-37d6-cfac-0000-002e7f000001] [tokens.TokenRefreshHandler] token of user "uid:3772743332862623744" does not need to be refreshed
+2025-09-29 07:56:29 [REQUEST] [8bf83496-37d6-cfac-0000-002e7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/tokens/refresh.json 2ms
+2025-09-29 07:56:29 [REQUEST] [8bf83496-37d6-cfaa-0000-00367f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/transactions/amounts.json?use_transaction_timezone=false&query=today_1759075200_1759161599|thisWeek_1759075200_1759679999|thisMonth_1756656000_1759247999|thisYear_1735660800_1767196799|lastMonth_1753977600_1756655999|monthBeforeLastMonth_1751299200_1753977599|monthBeforeLast2Months_1748707200_1751299199|monthBeforeLast3Months_1746028800_1748707199|monthBeforeLast4Months_1743436800_1746028799|monthBeforeLast5Months_1740758400_1743436799|monthBeforeLast6Months_1738339200_1740758399|monthBeforeLast7Months_1735660800_1738339199|monthBeforeLast8Months_1732982400_1735660799|monthBeforeLast9Months_1730390400_1732982399|monthBeforeLast10Months_1727712000_1730390399 6ms
+2025-09-29 07:56:29 [REQUEST] [8bf83496-37d6-cfad-0000-003a7f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/accounts/list.json?visible_only=false 2ms
+2025-09-29 07:56:29 [REQUEST] [8bf83496-37d6-cfa4-0000-002a7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 107ms
+2025-09-29 07:56:29 [REQUEST] [8bf83496-37d6-cfab-0000-00327f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 106ms
+2025-09-29 07:56:34 [REQUEST] [8bf83496-37d9-4fac-0000-003e7f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/users/profile/get.json 0ms
+2025-09-29 07:56:44 [REQUEST] [8bf83496-37de-4fac-0000-00427f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/users/verify_email/resend.json 2ms
+2025-09-29 07:56:57 [INFO] [8bf83496-37e4-cfd2-0000-0047a2ca6717] [users.UserEmailVerifyHandler] revoke old email verify tokens for user "uid:3772743332862623744"
+2025-09-29 07:56:57 [INFO] [8bf83496-37e4-cfd2-0000-0047a2ca6717] [users.UserEmailVerifyHandler] user "uid:3772743332862623744" token created, new token will be expired at 1761695817
+2025-09-29 07:56:57 [REQUEST] [8bf83496-37e4-cfd2-0000-0047a2ca6717] 200 0 3772743332862623744 ::1 POST /api/verify_email/by_token.json?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyVG9rZW5JZCI6IjQwNjk3MDA1NTgwNDM3MTMxODciLCJqdGkiOiIzNzcyNzQzMzMyODYyNjIzNzQ0IiwidXNlcm5hbWUiOiJ0aWFubWEiLCJ0eXBlIjozLCJpYXQiOjE3NTkxMDM4MDQsImV4cCI6MTc1OTEwNzQwNH0.54OeAMjLha4ipOFEoBNBZvIbCS1abfSXxyn3ywC0hPg 4ms
+2025-09-29 07:57:00 [REQUEST] [8bf83496-37e6-4fd6-0000-004ba2ca6717] 200 0 3772743332862623744 ::1 GET /api/v1/accounts/list.json?visible_only=false 0ms
+2025-09-29 07:57:00 [REQUEST] [8bf83496-37e6-4f91-0000-004fa2ca6717] 200 0 3772743332862623744 ::1 GET /api/v1/transactions/amounts.json?use_transaction_timezone=false&query=today_1759075200_1759161599|thisWeek_1758988800_1759593599|thisMonth_1756656000_1759247999|thisYear_1735660800_1767196799|lastMonth_1753977600_1756655999|monthBeforeLastMonth_1751299200_1753977599|monthBeforeLast2Months_1748707200_1751299199|monthBeforeLast3Months_1746028800_1748707199|monthBeforeLast4Months_1743436800_1746028799|monthBeforeLast5Months_1740758400_1743436799|monthBeforeLast6Months_1738339200_1740758399|monthBeforeLast7Months_1735660800_1738339199|monthBeforeLast8Months_1732982400_1735660799|monthBeforeLast9Months_1730390400_1732982399|monthBeforeLast10Months_1727712000_1730390399 2ms
+2025-09-29 07:57:02 [INFO] [8bf83496-37e7-4fa6-0000-00567f000001] [tokens.TokenRefreshHandler] token of user "uid:3772743332862623744" does not need to be refreshed
+2025-09-29 07:57:02 [WARNING] [8bf83496-37e7-4fad-0000-005a7f000001] [tokens.parseToken] token "utid:2002330934829616777" of user "uid:3772743332862623744" record not found, because database table is locked: token_record
+2025-09-29 07:57:02 [WARNING] [8bf83496-37e7-4fad-0000-005a7f000001] [tokens.parseToken] token is invalid, because token is unverifiable: error while executing keyfunc: token is not found
+2025-09-29 07:57:02 [WARNING] [8bf83496-37e7-4fad-0000-005a7f000001] [authorization.getTokenClaims] failed to parse token, because current token is invalid
+2025-09-29 07:57:02 [REQUEST] [8bf83496-37e7-4fad-0000-005a7f000001] 401 202002 - 127.0.0.1 POST /api/v1/stock_prices/quote.json 1ms
+2025-09-29 07:57:02 [REQUEST] [8bf83496-37e7-4fa6-0000-00567f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/tokens/refresh.json 4ms
+2025-09-29 07:57:02 [REQUEST] [8bf83496-37e7-4fa4-0000-005e7f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/accounts/list.json?visible_only=false 0ms
+2025-09-29 07:57:02 [REQUEST] [8bf83496-37e7-4fa6-0000-00627f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/users/profile/get.json 0ms
+2025-09-29 07:57:03 [REQUEST] [8bf83496-37e7-4fac-0000-00527f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 54ms
+2025-09-29 07:58:36 [REQUEST] [8bf83496-3816-4fac-0000-00667f000001] 200 0 3772743332862623744 127.0.0.1 GET /api/v1/organizations/list.json 0ms
+2025-09-29 07:59:59 [INFO] [cron-job-createscheduledtransaction-1759103999] [cron_job.doRun] run job "CreateScheduledTransaction" successfully, cost 1ms
+2025-09-29 08:02:03 [REQUEST] [8bf83496-387d-cfac-0000-006a7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 82ms
+2025-09-29 08:02:03 [REQUEST] [8bf83496-387d-d121-0000-006e7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 86ms
+2025-09-29 08:07:03 [REQUEST] [8bf83496-3913-cfac-0000-00767f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 76ms
+2025-09-29 08:07:03 [REQUEST] [8bf83496-3913-d121-0000-00727f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 84ms
+2025-09-29 08:12:03 [REQUEST] [8bf83496-39a9-d334-0000-007e7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 79ms
+2025-09-29 08:12:03 [REQUEST] [8bf83496-39a9-d335-0000-007a7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 90ms
+2025-09-29 08:14:59 [INFO] [cron-job-createscheduledtransaction-1759104899] [cron_job.doRun] run job "CreateScheduledTransaction" successfully, cost 1ms
+2025-09-29 08:17:03 [REQUEST] [8bf83496-3a3f-d334-0000-00867f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 90ms
+2025-09-29 08:17:03 [REQUEST] [8bf83496-3a3f-d335-0000-00827f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 95ms
+2025-09-29 08:22:03 [REQUEST] [8bf83496-3ad5-d334-0000-008a7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 92ms
+2025-09-29 08:22:03 [REQUEST] [8bf83496-3ad5-d335-0000-008e7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 97ms
+2025-09-29 08:27:03 [REQUEST] [8bf83496-3b6b-d335-0000-00967f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 115ms
+2025-09-29 08:27:03 [REQUEST] [8bf83496-3b6b-d334-0000-00927f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 121ms
+2025-09-29 08:30:00 [INFO] [cron-job-createscheduledtransaction-1759105800] [cron_job.doRun] run job "CreateScheduledTransaction" successfully, cost 1ms
+2025-09-29 08:32:11 [REQUEST] [8bf83496-3c05-d4f3-0000-009a7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 79ms
+2025-09-29 08:32:11 [REQUEST] [8bf83496-3c05-d4f4-0000-009e7f000001] 200 0 3772743332862623744 127.0.0.1 POST /api/v1/stock_prices/quote.json 87ms

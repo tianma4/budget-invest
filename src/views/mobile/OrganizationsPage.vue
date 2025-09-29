@@ -343,7 +343,7 @@ const getOrganizationRoleName = (role: OrganizationRole): string => {
 const loadOrganizations = async () => {
     try {
         await organizationStore.loadOrganizations();
-    } catch (error) {
+    } catch {
         f7.toast.create({
             text: tt('Failed to load organizations'),
             position: 'center',
@@ -380,7 +380,7 @@ const createOrganization = async () => {
         }).open();
 
         await loadOrganizations();
-    } catch (error) {
+    } catch {
         f7.toast.create({
             text: tt('Failed to create organization'),
             position: 'center',
@@ -411,7 +411,7 @@ const joinOrganization = async () => {
         }).open();
 
         await loadOrganizations();
-    } catch (error) {
+    } catch {
         f7.toast.create({
             text: tt('Failed to join organization'),
             position: 'center',
@@ -428,13 +428,13 @@ const switchToOrganization = async (organization: OrganizationBasicInfo) => {
     }
 
     try {
-        await organizationStore.setCurrentOrganization(Organization.of(organization as any));
+        await organizationStore.setCurrentOrganization(Organization.of(organization));
         f7.toast.create({
             text: tt('Switched to organization: {name}', { name: organization.name }),
             position: 'center',
             closeTimeout: 2000,
         }).open();
-    } catch (error) {
+    } catch {
         f7.toast.create({
             text: tt('Failed to switch organization'),
             position: 'center',
@@ -468,7 +468,7 @@ const inviteMember = async () => {
             position: 'center',
             closeTimeout: 2000,
         }).open();
-    } catch (error) {
+    } catch {
         f7.toast.create({
             text: tt('Failed to send invitation'),
             position: 'center',
@@ -503,7 +503,7 @@ const leaveOrganization = async () => {
         }).open();
 
         await loadOrganizations();
-    } catch (error) {
+    } catch {
         f7.toast.create({
             text: tt('Failed to leave organization'),
             position: 'center',

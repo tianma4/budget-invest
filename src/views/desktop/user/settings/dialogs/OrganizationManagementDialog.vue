@@ -141,7 +141,7 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from '@/locales/helpers.ts';
 import { useOrganizationStore } from '@/stores/organization.ts';
 import { useUserStore } from '@/stores/user.ts';
-import type { OrganizationRole } from '@/models/organization.ts';
+import type { OrganizationRole, Organization, OrganizationMember } from '@/models/organization.ts';
 import {
     mdiDomain,
     mdiClose,
@@ -154,7 +154,7 @@ import {
 
 const props = defineProps<{
     modelValue: boolean;
-    organization: any;
+    organization: Organization;
 }>();
 
 const emit = defineEmits<{
@@ -170,7 +170,7 @@ const inviting = ref(false);
 const loadingMembers = ref(false);
 const inviteEmail = ref('');
 const inviteRole = ref(3); // Default to Member
-const members = ref<any[]>([]);
+const members = ref<OrganizationMember[]>([]);
 
 const rules = {
     required: (value: string) => !!value || tt('This field is required'),
@@ -255,7 +255,7 @@ const loadMembers = async () => {
     }
 };
 
-const removeMember = async (member: any) => {
+const removeMember = async (member: OrganizationMember) => {
     if (!props.organization) return;
 
     try {
