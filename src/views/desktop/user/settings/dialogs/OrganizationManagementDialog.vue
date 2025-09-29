@@ -69,6 +69,39 @@
                                         </v-col>
                                     </v-row>
                                 </v-form>
+
+                                <v-divider class="my-4"/>
+
+                                <div class="mb-4">
+                                    <h6 class="text-h6 mb-2">{{ tt('Invitation Link') }}</h6>
+                                    <p class="text-body-2 text-medium-emphasis mb-3">
+                                        {{ tt('Share this link with people you want to invite. They can use it during signup to automatically join your organization.') }}
+                                    </p>
+
+                                    <v-row>
+                                        <v-col cols="12" md="8">
+                                            <v-text-field
+                                                :model-value="invitationLink"
+                                                :label="tt('Invitation Link')"
+                                                variant="outlined"
+                                                density="compact"
+                                                readonly
+                                                append-inner-icon="mdi-content-copy"
+                                                @click:append-inner="copyInvitationLink"
+                                            />
+                                        </v-col>
+                                        <v-col cols="12" md="4">
+                                            <v-select
+                                                v-model="linkRole"
+                                                :items="availableRoles"
+                                                :label="tt('Default Role')"
+                                                variant="outlined"
+                                                density="compact"
+                                                @update:model-value="generateInvitationLink"
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </div>
                             </v-card-text>
                         </v-card>
                     </v-col>
@@ -170,6 +203,8 @@ const inviting = ref(false);
 const loadingMembers = ref(false);
 const inviteEmail = ref('');
 const inviteRole = ref(3); // Default to Member
+const linkRole = ref(3); // Default to Member for invitation link
+const invitationLink = ref('');
 const members = ref<OrganizationMember[]>([]);
 
 const rules = {
@@ -271,10 +306,49 @@ const removeMember = async (member: OrganizationMember) => {
     }
 };
 
+const generateInvitationLink = () => {
+    if (!props.organization) return;
+
+    // Create invitation parameters
+    const params = new URLSearchParams({
+        orgId: props.organization.organizationId,
+        role: linkRole.value.toString()
+    });
+
+    // Generate signup URL with invitation parameters
+    const baseUrl = window.location.origin;
+    invitationLink.value = `${baseUrl}/signup?invite=${btoa(params.toString())}`;
+};
+
+const copyInvitationLink = async () => {
+    if (!invitationLink.value) return;
+
+    try {
+        await navigator.clipboard.writeText(invitationLink.value);
+        // Could add a toast notification here
+        console.log('Invitation link copied to clipboard');
+    } catch (error) {
+        console.error('Failed to copy invitation link:', error);
+        // Fallback: select the text
+        const input = document.createElement('input');
+        input.value = invitationLink.value;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+    }
+};
+
 // Load members when dialog opens
 watch(() => props.modelValue, (newValue) => {
     if (newValue && props.organization) {
         loadMembers();
+        generateInvitationLink();
     }
+});
+
+// Update invitation link when role changes
+watch(() => linkRole.value, () => {
+    generateInvitationLink();
 });
 </script>
