@@ -60,7 +60,7 @@ func (s *StockPriceService) GetStockPrice(c core.Context, tickerSymbol string) (
 	stockPrice, err := s.getStockPriceFromCache(c, tickerSymbol)
 	if err == nil && stockPrice != nil {
 		// Check if cache is still fresh (less than 1 hour old)
-		if time.Now().Unix()-stockPrice.LastUpdatedTime < 3600 {
+		if time.Since(time.Unix(stockPrice.LastUpdatedTime, 0)) < 5*time.Minute {
 			return stockPrice, nil
 		}
 	}
@@ -182,7 +182,7 @@ func (s *StockPriceService) fetchStockPriceFromAPI(c core.Context, tickerSymbol 
 // fetchFromYahooFinance fetches stock price from Yahoo Finance API
 func (s *StockPriceService) fetchFromYahooFinance(c core.Context, tickerSymbol string) (*models.StockPrice, error) {
 	url := fmt.Sprintf("https://query1.finance.yahoo.com/v8/finance/chart/%s", tickerSymbol)
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
