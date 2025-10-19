@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -29,30 +31,34 @@ type StockQuoteRequest struct {
 
 // StockQuoteResponse represents the stock quote response
 type StockQuoteResponse struct {
-	Symbol         string  `json:"symbol"`
-	Price          int64   `json:"price"`          // Price in cents
-	Change         int64   `json:"change"`         // Change in cents
-	ChangePercent  float64 `json:"changePercent"`
-	LastUpdate     int64   `json:"lastUpdate"`
-	IsValid        bool    `json:"isValid"`
+	Symbol        string  `json:"symbol"`
+	Price         int64   `json:"price"`  // Price in cents
+	Change        int64   `json:"change"` // Change in cents
+	ChangePercent float64 `json:"changePercent"`
+	LastUpdate    int64   `json:"lastUpdate"`
+	IsValid       bool    `json:"isValid"`
 }
 
 // MultiStockQuoteResponse represents multiple stock quotes response
 type MultiStockQuoteResponse struct {
 	Quotes map[string]StockQuoteResponse `json:"quotes"`
-	Count  int                          `json:"count"`
+	Count  int                           `json:"count"`
 }
 
 // YahooFinanceQuoteResult represents Yahoo Finance API response structure
 type YahooFinanceQuoteResult struct {
-	Chart struct {
+	QuoteResponse struct {
 		Result []struct {
-			Meta struct {
-				RegularMarketPrice float64 `json:"regularMarketPrice"`
-				PreviousClose      float64 `json:"previousClose"`
-			} `json:"meta"`
+			Symbol                     string  `json:"symbol"`
+			RegularMarketPrice         float64 `json:"regularMarketPrice"`
+			RegularMarketChange        float64 `json:"regularMarketChange"`
+			RegularMarketChangePercent float64 `json:"regularMarketChangePercent"`
+			RegularMarketPreviousClose float64 `json:"regularMarketPreviousClose"`
+			RegularMarketTime          int64   `json:"regularMarketTime"`
+			Currency                   string  `json:"currency"`
+			ShortName                  string  `json:"shortName"`
 		} `json:"result"`
-	} `json:"chart"`
+	} `json:"quoteResponse"`
 }
 
 // StockQuoteHandler handles single stock quote requests
@@ -109,12 +115,12 @@ func (a *StockPricesApi) MultiStockQuoteHandler(c *core.WebContext) (any, *errs.
 		} else {
 			// Add invalid quote for failed symbols
 			response.Quotes[symbol] = StockQuoteResponse{
-				Symbol:         symbol,
-				Price:          0,
-				Change:         0,
-				ChangePercent:  0,
-				LastUpdate:     time.Now().UnixMilli(),
-				IsValid:        false,
+				Symbol:        symbol,
+				Price:         0,
+				Change:        0,
+				ChangePercent: 0,
+				LastUpdate:    time.Now().UnixMilli(),
+				IsValid:       false,
 			}
 		}
 	}
@@ -125,8 +131,8 @@ func (a *StockPricesApi) MultiStockQuoteHandler(c *core.WebContext) (any, *errs.
 // fetchStockQuote fetches stock quote from Yahoo Finance API
 func (a *StockPricesApi) fetchStockQuote(c *core.WebContext, symbol string) (*StockQuoteResponse, *errs.Error) {
 	// Use Yahoo Finance API with server-side request to avoid CORS issues
-	url := fmt.Sprintf("https://query1.finance.yahoo.com/v8/finance/chart/%s?interval=1m&range=1d", symbol)
-	
+	apiURL := fmt.Sprintf("https://query1.finance.yahoo.com/v7/finance/quote?symbols=%s", url.QueryEscape(symbol))
+
 	log.Debugf(c, "[stock_prices.fetchStockQuote] Fetching stock quote for %s", symbol)
 
 	// Create HTTP client with timeout
@@ -135,7 +141,7 @@ func (a *StockPricesApi) fetchStockQuote(c *core.WebContext, symbol string) (*St
 	}
 
 	// Create request
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
 		log.Warnf(c, "[stock_prices.fetchStockQuote] Failed to create request for %s: %s", symbol, err.Error())
 		return nil, errs.ErrStockQuoteFetchFailed
@@ -173,42 +179,46 @@ func (a *StockPricesApi) fetchStockQuote(c *core.WebContext, symbol string) (*St
 	}
 
 	// Validate response structure
-	if len(yahooResponse.Chart.Result) == 0 {
+	if len(yahooResponse.QuoteResponse.Result) == 0 {
 		log.Warnf(c, "[stock_prices.fetchStockQuote] No data found for symbol %s", symbol)
 		return nil, errs.ErrStockQuoteNotFound
 	}
 
-	meta := yahooResponse.Chart.Result[0].Meta
-	currentPrice := meta.RegularMarketPrice
-	previousClose := meta.PreviousClose
+	result := yahooResponse.QuoteResponse.Result[0]
 
-	if currentPrice == 0 && previousClose != 0 {
-		currentPrice = previousClose
-	}
-
+	currentPrice := result.RegularMarketPrice
 	if currentPrice == 0 {
 		log.Warnf(c, "[stock_prices.fetchStockQuote] Invalid price data for symbol %s", symbol)
 		return nil, errs.ErrStockQuoteNotFound
 	}
 
-	// Calculate changes
-	change := currentPrice - previousClose
-	changePercent := float64(0)
-	if previousClose != 0 {
-		changePercent = (change / previousClose) * 100
+	change := result.RegularMarketChange
+	changePercent := result.RegularMarketChangePercent
+
+	lastUpdate := result.RegularMarketTime
+	if lastUpdate == 0 {
+		lastUpdate = time.Now().Unix()
 	}
+
+	apiSymbol := result.Symbol
+	if apiSymbol == "" {
+		apiSymbol = symbol
+	}
+
+	priceInCents := int64(math.Round(currentPrice * 100))
+	changeInCents := int64(math.Round(change * 100))
 
 	quote := &StockQuoteResponse{
-		Symbol:         symbol,
-		Price:          int64(currentPrice * 100), // Convert to cents
-		Change:         int64(change * 100),       // Convert to cents
-		ChangePercent:  changePercent,
-		LastUpdate:     time.Now().UnixMilli(),
-		IsValid:        true,
+		Symbol:        apiSymbol,
+		Price:         priceInCents,
+		Change:        changeInCents,
+		ChangePercent: changePercent,
+		LastUpdate:    lastUpdate * 1000, // convert seconds to milliseconds
+		IsValid:       true,
 	}
 
-	log.Debugf(c, "[stock_prices.fetchStockQuote] Successfully fetched quote for %s: $%.2f (%.2f%%)", 
-		symbol, currentPrice, changePercent)
+	log.Debugf(c, "[stock_prices.fetchStockQuote] Successfully fetched quote for %s: $%.2f (%.2f%%)",
+		apiSymbol, currentPrice, changePercent)
 
 	return quote, nil
 }

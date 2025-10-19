@@ -3,7 +3,9 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/mayswind/ezbookkeeping/pkg/core"
@@ -36,18 +38,6 @@ type GlobalQuote struct {
 	PreviousClose    string `json:"08. previous close"`
 	Change           string `json:"09. change"`
 	ChangePercent    string `json:"10. change percent"`
-}
-
-// YahooFinanceResponse represents Yahoo Finance API response
-type YahooFinanceResponse struct {
-	QuoteResponse struct {
-		Result []struct {
-			Symbol             string  `json:"symbol"`
-			RegularMarketPrice float64 `json:"regularMarketPrice"`
-			ShortName          string  `json:"shortName"`
-			Currency           string  `json:"currency"`
-		} `json:"result"`
-	} `json:"quoteResponse"`
 }
 
 // GetStockPrice returns current stock price for a ticker symbol
@@ -181,9 +171,9 @@ func (s *StockPriceService) fetchStockPriceFromAPI(c core.Context, tickerSymbol 
 
 // fetchFromYahooFinance fetches stock price from Yahoo Finance API
 func (s *StockPriceService) fetchFromYahooFinance(c core.Context, tickerSymbol string) (*models.StockPrice, error) {
-	url := fmt.Sprintf("https://query1.finance.yahoo.com/v8/finance/chart/%s", tickerSymbol)
+	endpoint := fmt.Sprintf("https://query1.finance.yahoo.com/v7/finance/quote?symbols=%s", url.QueryEscape(tickerSymbol))
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -193,54 +183,56 @@ func (s *StockPriceService) fetchFromYahooFinance(c core.Context, tickerSymbol s
 		return nil, fmt.Errorf("Yahoo Finance API returned status %d", resp.StatusCode)
 	}
 
-	var data map[string]interface{}
+	var data struct {
+		QuoteResponse struct {
+			Result []struct {
+				Symbol             string  `json:"symbol"`
+				ShortName          string  `json:"shortName"`
+				Currency           string  `json:"currency"`
+				RegularMarketPrice float64 `json:"regularMarketPrice"`
+				RegularMarketTime  int64   `json:"regularMarketTime"`
+			} `json:"result"`
+		} `json:"quoteResponse"`
+	}
+
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		return nil, err
 	}
 
 	// Parse Yahoo Finance response
-	chart, ok := data["chart"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("invalid response format from Yahoo Finance")
-	}
-
-	results, ok := chart["result"].([]interface{})
-	if !ok || len(results) == 0 {
+	if len(data.QuoteResponse.Result) == 0 {
 		return nil, fmt.Errorf("no results in Yahoo Finance response")
 	}
 
-	result := results[0].(map[string]interface{})
-	meta, ok := result["meta"].(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("no meta data in Yahoo Finance response")
-	}
+	result := data.QuoteResponse.Result[0]
 
-	// Extract price and currency
-	regularMarketPrice, ok := meta["regularMarketPrice"].(float64)
-	if !ok {
+	if result.RegularMarketPrice == 0 {
 		return nil, fmt.Errorf("no regular market price in response")
 	}
 
-	currency, ok := meta["currency"].(string)
-	if !ok {
-		currency = "USD" // Default to USD if not specified
+	currency := result.Currency
+	if currency == "" {
+		currency = "USD"
 	}
 
-	symbol, ok := meta["symbol"].(string)
-	if !ok {
+	symbol := result.Symbol
+	if symbol == "" {
 		symbol = tickerSymbol
 	}
 
-	// Convert price to cents for storage
-	priceInCents := int64(regularMarketPrice * 100)
+	priceInCents := int64(math.Round(result.RegularMarketPrice * 100))
+	lastUpdated := result.RegularMarketTime
+	if lastUpdated == 0 {
+		lastUpdated = time.Now().Unix()
+	}
 
 	stockPrice := &models.StockPrice{
 		TickerSymbol:    symbol,
-		CompanyName:     "", // Yahoo doesn't provide company name in this endpoint
+		CompanyName:     result.ShortName,
 		CurrentPrice:    priceInCents,
 		Currency:        currency,
-		LastUpdatedTime: time.Now().Unix(),
+		LastUpdatedTime: lastUpdated,
 	}
 
 	return stockPrice, nil
