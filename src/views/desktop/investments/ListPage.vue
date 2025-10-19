@@ -270,9 +270,29 @@ const addTransaction = (investment: typeof investments.value[0]) => {
     showTransactionDialog.value = true;
 };
 
-const deleteInvestment = (investment: typeof investments.value[0]) => {
-    // TODO: Show confirmation dialog and delete
-    console.log('Delete investment:', investment);
+const deleteInvestment = async (investment: typeof investments.value[0]) => {
+    if (!investment) {
+        return;
+    }
+
+    const confirmed = window.confirm(
+        tt('Are you sure you want to delete investment {0}? This cannot be undone.', investment.tickerSymbol)
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    loading.value = true;
+
+    try {
+        await investmentStore.deleteInvestment(investment.investmentId);
+    } catch (error) {
+        console.error('Failed to delete investment:', error);
+        window.alert(tt('Failed to delete the investment. Please try again.'));
+    } finally {
+        loading.value = false;
+    }
 };
 
 const onInvestmentAdded = () => {

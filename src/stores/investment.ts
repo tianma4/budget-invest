@@ -72,7 +72,7 @@ export const useInvestmentStore = defineStore('investments', () => {
     // Real-time price update state
     const isRefreshingPrices = ref(false);
     const lastPriceRefresh = ref<number>(0);
-    const priceRefreshInterval = ref<NodeJS.Timeout | null>(null);
+    const priceRefreshInterval = ref<ReturnType<typeof setInterval> | null>(null);
     const PRICE_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
     // TODO: Replace with actual API calls when backend investment endpoints are implemented
@@ -115,16 +115,38 @@ export const useInvestmentStore = defineStore('investments', () => {
 
     async function deleteInvestment(investmentId: string): Promise<void> {
         // TODO: Replace with DELETE /api/v1/investments/delete.json
+        let storageError: unknown = undefined;
+
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                const investments = JSON.parse(stored) as Investment[];
-                const filtered = investments.filter(inv => inv.investmentId !== investmentId);
+            const storedInvestments = stored ? JSON.parse(stored) as Investment[] : investments.value;
+            const filtered = storedInvestments.filter(inv => inv.investmentId !== investmentId);
+
+            if (filtered.length === 0) {
+                localStorage.removeItem(STORAGE_KEY);
+            } else {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
             }
         } catch (error) {
-            console.error('Failed to delete investment:', error);
-            throw error;
+            console.error('Failed to delete investment from storage:', error);
+            storageError = error;
+        }
+
+        const updatedInvestments = investments.value.filter(inv => inv.investmentId !== investmentId);
+
+        if (updatedInvestments.length !== investments.value.length) {
+            investments.value = updatedInvestments;
+
+            updatePortfolioSummary();
+
+            if (investments.value.length === 0) {
+                stopPriceRefresh();
+                lastPriceRefresh.value = 0;
+            }
+        }
+
+        if (storageError) {
+            throw storageError instanceof Error ? storageError : new Error(String(storageError));
         }
     }
     
