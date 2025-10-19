@@ -175,6 +175,11 @@ const router = createRouter({
                     beforeEnter: checkLogin
                 },
                 {
+                    path: '/investment/list',
+                    beforeEnter: checkLogin,
+                    redirect: '/investments'
+                },
+                {
                     path: '/planning',
                     component: PlanningDashboardPage,
                     beforeEnter: checkLogin
